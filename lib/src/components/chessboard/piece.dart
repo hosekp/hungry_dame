@@ -7,7 +7,10 @@ part of chessboard;
   """,
     host: const {
       '(click)': "onClick()",
-      '[class.black]': 'isBlack',
+      '[class.black]': 'piece?.isBlack == true',
+      '[class.white]': 'piece?.isWhite == true',
+      '[class.dame]': 'piece?.isDame == true',
+      '[class.playable]': 'isPlayable',
       '[class.active]': 'isActive'
     },
     styles: const [
@@ -15,7 +18,7 @@ part of chessboard;
       :host{
         border-radius: 1000000px;
         border: 2px solid #aaa;
-        display: block;
+        display: none;
         width: 60%;
         height: 60%;
         position:relative;
@@ -23,19 +26,31 @@ part of chessboard;
         top: 20%;
         background-color: white;
       }
+      :host(.white){
+        display: block;
+      }
       :host(.black){
         background-color: black;
+        display: block;
       }
       :host(.active){
-        border: 5px solid red;
+        border-width: 5px;
+        margin: -3px;
+      }
+      :host(.playable){
+        border-color: red;
+      }
+      :host(.dame){
+        width: 80%;
+        height: 80%;
+        left: 10%;
+        top: 10%;
       }
     """
     ])
 class PieceComponent {
   @Input()
-  int position;
-  @Input("black")
-  bool isBlack;
+  Piece piece;
   final ChangeDetectorRef changeDetector;
   final CurrentState currentState;
 
@@ -45,13 +60,10 @@ class PieceComponent {
       changeDetector.detectChanges();
     });
   }
-  bool get isActive => currentState.activePiece == position;
+  bool get isActive => currentState.activePiece == piece;
+  bool get isPlayable => currentState.playablePieces.contains(piece);
 
   void onClick() {
-    if (currentState.blackIsPlaying != isBlack) {
-      currentState.activePiece = null;
-      return;
-    }
-    currentState.activePiece = position;
+    currentState.setActivePiece(piece);
   }
 }

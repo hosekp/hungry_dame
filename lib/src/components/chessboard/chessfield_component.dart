@@ -1,17 +1,18 @@
 part of chessboard;
 
 @Component(
-  selector: "chessfield",
-  directives: const [PieceComponent,NgIf],
-//  providers: const[CurrentState],
-  template: """
-    <piece *ngIf='hasWhitePiece' [position]='index' [black]='false'></piece>
-    <piece *ngIf='hasBlackPiece' [position]='index' [black]='true'></piece>
+    selector: "chessfield",
+    directives: const [PieceComponent, NgIf],
+    template: """
+    <div class='label-index'>{{index}}</div>
+    <piece [piece]='piece'></piece>
   """,
     host: const {
-      '[class.black]':'isBlackField',
+      '[class.black]': 'isBlackField',
+      '[class.possible]': 'isPossibleField',
     },
-  styles: const ["""
+    styles: const [
+      """
     :host{
       height: 100px;
       width: 100px;
@@ -19,22 +20,37 @@ part of chessboard;
       float:left;
       background-color: beige;
     }
-    :host(.black):{
+    :host(.black){
       background-color: #310;
     }
-  """]
-)
-class ChessFieldComponent{
+    :host(.possible){
+      background-color: red;
+    }
+    .label-index{
+      position: absolute;
+    }
+    :host(.black) .label-index{
+      color: white;
+    }
+  """
+    ])
+class ChessFieldComponent {
   @Input()
   int index;
   final CurrentState currentState;
+  final ChangeDetectorRef changeDetector;
 
-  ChessFieldComponent(this.currentState);
-
-  bool get isBlackField {
-    return ((index/8).floor()+index)%2==1;
+  ChessFieldComponent(this.currentState, this.changeDetector) {
+    currentState.possiblesChanged.add(() {
+      changeDetector.detectChanges();
+    });
   }
-  bool get hasWhitePiece => currentState.arrangement.whiteIndices.contains(index);
-  bool get hasBlackPiece => currentState.arrangement.blackIndices.contains(index);
 
+  bool get isBlackField => ((index / 8).floor() + index) % 2 == 1;
+  bool get isPossibleField {
+    if (currentState.possibleFields == null) return false;
+    return currentState.possibleFields.contains(index);
+  }
+
+  Piece get piece => currentState.arrangement.pieces[index];
 }
