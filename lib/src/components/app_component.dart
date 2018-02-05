@@ -5,10 +5,16 @@ import 'package:hungry_dame/src/components/chessboard/chessboard.dart';
 
 @Component(
   selector: 'my-app',
-  styleUrls: const ['app_component.css'],
-  templateUrl: 'app_component.html',
   directives: const [materialDirectives, ChessBoardComponent],
   providers: const [materialProviders],
+  template: """
+    <h1>Hungry dame</h1>
+    <chessboard></chessboard>
+    <recommendations></recommendations>
+  """,
+  styles: const["""
+  
+  """]
 )
 class AppComponent {
 }

@@ -3,10 +3,10 @@ part of chessboard;
 @Component(
   selector: "chessfield",
   directives: const [PieceComponent,NgIf],
-  providers: const[CurrentState],
+//  providers: const[CurrentState],
   template: """
-    <piece class='white' *ngIf='hasWhitePiece'></piece>
-    <piece class='black' *ngIf='hasBlackPiece'></piece>
+    <piece *ngIf='hasWhitePiece' [position]='index' [black]='false'></piece>
+    <piece *ngIf='hasBlackPiece' [position]='index' [black]='true'></piece>
   """,
     host: const {
       '[class.black]':'isBlackField',
