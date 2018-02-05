@@ -8,6 +8,7 @@ part of chessboard;
     <piece [piece]='piece'></piece>
   """,
     host: const {
+      '(click)':"onClick()",
       '[class.black]': 'isBlackField',
       '[class.possible]': 'isPossibleField',
     },
@@ -53,4 +54,9 @@ class ChessFieldComponent {
   }
 
   Piece get piece => currentState.arrangement.pieces[index];
+
+  void onClick(){
+    if(!currentState.possibleFields.contains(index)) return;
+    currentState.move(currentState.activePiece, index);
+  }
 }

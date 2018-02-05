@@ -34,4 +34,23 @@ class State {
     playablePieces.addAll(playingPieces);
     isForced=false;
   }
+
+  void removePieceInLine(int from,int to,Arrangement arrangement){
+    int diff = to-from;
+    int step;
+    if(diff>0){
+      step=diff%7==0?7:9;
+    }else{
+      step=-diff%7==0?-7:-9;
+    }
+    int mover=from;
+    while(mover!=to){
+      mover+=step;
+      Piece piece=arrangement.pieces[mover];
+      if(piece!=null){
+        arrangement.remove(piece);
+        return;
+      }
+    }
+  }
 }

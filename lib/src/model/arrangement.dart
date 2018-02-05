@@ -22,4 +22,8 @@ class Arrangement {
     }
     return initialPieces;
   }
+
+  void remove(Piece piece) {
+    pieces.remove(piece.position);
+  }
 }

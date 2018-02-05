@@ -19,16 +19,16 @@ class Piece {
     List<int> moves = [];
     if(canLeftJump(position, arrangement)){
       if(isBlack){
-        moves.add(leftDownMove(position));
+        moves.add(leftDownMove(leftDownMove(position)));
       }else{
-        moves.add(leftUpMove(position));
+        moves.add(leftUpMove(leftUpMove(position)));
       }
     }
     if(canRightJump(position, arrangement)){
       if(isBlack){
-        moves.add(rightDownMove(position));
+        moves.add(rightDownMove(rightDownMove(position)));
       }else{
-        moves.add(rightUpMove(position));
+        moves.add(rightUpMove(rightUpMove(position)));
       }
     }
     return moves;

@@ -41,12 +41,11 @@ class Notificator {
     _stack.clear();
   }
 
-//  void announce(dynamic message, String category) {
-//    Inspector.addTimestamp("announced $message");
-//    add(() {
-//      Inspector.log(message, category);
-//    });
-//  }
+  void announce(dynamic message, String category) {
+    add(() {
+     print("$message, $category");
+    });
+  }
 }
 
 class LazyNotificator extends Notificator {

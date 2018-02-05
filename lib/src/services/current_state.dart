@@ -17,6 +17,7 @@ class CurrentState extends State {
     possibleFinder.state = this;
     arrangement = new Arrangement.start();
     findPlayablePieces();
+//    possiblesChanged.announce("possibleChanged","");
   }
 
   void setActivePiece(Piece activePiece) {
@@ -31,13 +32,9 @@ class CurrentState extends State {
     activePieceChanged.notify();
   }
 
-  void setBlackIsPlaying(bool blackIsPlaying) {
-    this.blackIsPlaying = blackIsPlaying;
-    blackIsPlayingChanged.notify();
-  }
-
   void findPossibles(){
     if(activePiece==null){
+      possibleFields=[];
       possiblesChanged.notify();
       return;
     }
@@ -47,5 +44,32 @@ class CurrentState extends State {
       possibleFields=activePiece.possibleMoves(arrangement);
     }
     possiblesChanged.notify();
+  }
+
+  void nextPlayer(){
+    isForced=false;
+    chainedPiece=null;
+    blackIsPlaying = !blackIsPlaying;
+    blackIsPlayingChanged.notify();
+    findPlayablePieces();
+    setActivePiece(null);
+  }
+  void chainedMove(Piece piece){
+    chainedPiece = piece;
+    findPlayablePieces();
+    setActivePiece(piece);
+  }
+  void move(Piece piece,int position){
+    if(isForced){
+      removePieceInLine(piece.position, position, arrangement);
+    }
+    arrangement.pieces[position]=piece;
+    arrangement.pieces.remove(piece.position);
+    piece.position=position;
+    if(piece.isForced(arrangement)){
+      chainedMove(piece);
+    }else{
+      nextPlayer();
+    }
   }
 }
