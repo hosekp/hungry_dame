@@ -8,7 +8,7 @@ part of chessboard;
     host: const {
       '(click)': "onClick()",
       '[class.black]': 'piece?.isBlack == true',
-      '[class.white]': 'piece?.isWhite == true',
+      '[class.white]': 'piece?.isBlack == false',
       '[class.dame]': 'isDame',
       '[class.playable]': 'isPlayable',
       '[class.active]': 'isActive'

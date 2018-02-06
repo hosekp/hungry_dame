@@ -53,4 +53,6 @@ class State {
       }
     }
   }
+  
+  bool isEndOfGame()=> !arrangement.pieces.values.any((Piece piece)=>piece.isBlack!=blackIsPlaying);
 }

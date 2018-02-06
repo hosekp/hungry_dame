@@ -10,15 +10,25 @@ class CurrentState extends State {
   final Notificator activePieceChanged = new Notificator();
   final Notificator blackIsPlayingChanged = new Notificator();
   final Notificator possiblesChanged = new Notificator();
+  final Notificator gameEnded = new Notificator();
   Piece activePiece;
   List<int> possibleFields;
 
   CurrentState() {
     possibleFinder.state = this;
-    arrangement = new Arrangement.start();
+    reset();
+  }
+  void reset(){
+    isForced=false;
+    chainedPiece=null;
+    blackIsPlaying = false;
+    blackIsPlayingChanged.notify();
+//    arrangement = new Arrangement.start();
 //    arrangement = new Arrangement.testChained();
 //    arrangement = new Arrangement.testDame();
+    arrangement = new Arrangement.testEnd();
     findPlayablePieces();
+    setActivePiece(null);
 //    possiblesChanged.announce("possibleChanged","");
   }
 
@@ -51,6 +61,10 @@ class CurrentState extends State {
   void nextPlayer(){
     isForced=false;
     chainedPiece=null;
+    if(isEndOfGame()){
+      gameEnded.notify();
+      return;
+    }
     blackIsPlaying = !blackIsPlaying;
     blackIsPlayingChanged.notify();
     findPlayablePieces();

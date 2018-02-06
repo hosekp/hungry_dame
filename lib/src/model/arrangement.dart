@@ -10,12 +10,13 @@ class Arrangement {
 
   Arrangement.testChained() : pieces = _initialPieces([12, 28], [19, 1, 5]) {}
   Arrangement.testDame() : pieces = _initialPieces([35,44], [26,21,14],[35]) {}
+  Arrangement.testEnd() : pieces = _initialPieces([35], [26,10],[35]) {}
 
   static Iterable<int> _whiteInitial() {
     return _blackInitial().map((i) => 63 - i);
   }
 
-  static Map<int, Piece> _initialPieces(List<int> whites, List<int> blacks, [List<int> dames]) {
+  static Map<int, Piece> _initialPieces(Iterable<int> whites, Iterable<int> blacks, [Iterable<int> dames]) {
     Map<int, Piece> initialPieces = {};
     for (int pos in whites) {
       initialPieces[pos] = new Piece(pos: pos);
