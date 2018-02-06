@@ -84,6 +84,18 @@ class Piece {
     if (origin > 55 || origin % 8 == 7) return null;
     return origin + 9;
   }
+  static int stepMove(int origin,int step){
+    if(step>0){ // DOWN
+      if(origin > 55) return null;
+    }else{  // UP
+      if(origin < 8) return null;
+    }
+    int originRow = (origin/8).floor();
+    int target = origin+step;
+    int targetRow = (target/8).floor();
+    if((originRow-targetRow).abs()!=1) return null;
+    return target;
+  }
 
   bool canLeftJump(int origin, Arrangement arrangement) {
     int target;

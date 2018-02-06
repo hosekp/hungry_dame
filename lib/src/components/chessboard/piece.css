@@ -1,0 +1,45 @@
+:host{
+  border-radius: 1000000px;
+  border: 2px solid #aaa;
+  display: none;
+  width: 60%;
+  height: 60%;
+  position:relative;
+  left: 20%;
+  top: 20%;
+  box-sizing: border-box;
+  background-color: white;
+}
+:host(.white){
+  display: block;
+}
+:host(.black){
+  background-color: black;
+  display: block;
+}
+:host(.active){
+  border-width: 5px;
+}
+:host(.playable){
+  border-color: red;
+}
+:host(.dame){
+  width: 80%;
+  height: 80%;
+  left: 10%;
+  top: 10%;
+}
+.dame-inner{
+  width: 60%;
+  height: 60%;
+  left: 20%;
+  top: 20%;
+  display: none;
+  border: 2px solid #aaa;
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 100000px;
+}
+:host(.dame) .dame-inner{
+  display: block;
+}
