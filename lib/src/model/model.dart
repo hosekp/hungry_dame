@@ -8,3 +8,4 @@ part 'arrangement.dart';
 part 'possible_finder.dart';
 part 'piece.dart';
 part 'dame.dart';
+part 'abstract_piece.dart';

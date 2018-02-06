@@ -15,8 +15,9 @@ class CurrentState extends State {
 
   CurrentState() {
     possibleFinder.state = this;
-//    arrangement = new Arrangement.start();
-    arrangement = new Arrangement.testChained();
+    arrangement = new Arrangement.start();
+//    arrangement = new Arrangement.testChained();
+//    arrangement = new Arrangement.testDame();
     findPlayablePieces();
 //    possiblesChanged.announce("possibleChanged","");
   }
@@ -67,7 +68,7 @@ class CurrentState extends State {
     arrangement.pieces[position]=piece;
     arrangement.pieces.remove(piece.position);
     piece.position=position;
-    if(piece.isForced(arrangement)){
+    if(isForced && piece.isForced(arrangement)){
       chainedMove(piece);
     }else{
       nextPlayer();

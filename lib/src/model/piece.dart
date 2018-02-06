@@ -1,63 +1,69 @@
 part of model;
 
-class Piece {
+class Piece implements AbstractPiece {
+  static const int LEFT_UP = -9;
+  static const int LEFT_DOWN = 7;
+  static const int RIGHT_UP = -7;
+  static const int RIGHT_DOWN = 9;
   bool isBlack = false;
   bool isDame = false;
   int position;
   Piece({bool black: false, int pos: null}) {
+    assert(pos != null);
     isBlack = black;
     position = pos;
   }
   bool get isWhite => !isBlack;
   bool isForced(Arrangement arrangement) {
-      if(canLeftJump(position, arrangement)) return true;
-      if(canRightJump(position, arrangement)) return true;
+    if (canLeftJump(position, arrangement)) return true;
+    if (canRightJump(position, arrangement)) return true;
     return false;
   }
 
   List<int> possibleForcedMoves(Arrangement arrangement) {
     List<int> moves = [];
-    if(canLeftJump(position, arrangement)){
-      if(isBlack){
+    if (canLeftJump(position, arrangement)) {
+      if (isBlack) {
         moves.add(leftDownMove(leftDownMove(position)));
-      }else{
+      } else {
         moves.add(leftUpMove(leftUpMove(position)));
       }
     }
-    if(canRightJump(position, arrangement)){
-      if(isBlack){
+    if (canRightJump(position, arrangement)) {
+      if (isBlack) {
         moves.add(rightDownMove(rightDownMove(position)));
-      }else{
+      } else {
         moves.add(rightUpMove(rightUpMove(position)));
       }
     }
     return moves;
   }
+
   List<int> possibleMoves(Arrangement arrangement) {
     List<int> moves = [];
-    if(isBlack){
+    if (isBlack) {
       int target = leftDownMove(position);
-      if (target!=null){
-        if(!arrangement.pieces.containsKey(target)){
+      if (target != null) {
+        if (!arrangement.pieces.containsKey(target)) {
           moves.add(target);
         }
       }
       target = rightDownMove(position);
-      if (target!=null){
-        if(!arrangement.pieces.containsKey(target)){
+      if (target != null) {
+        if (!arrangement.pieces.containsKey(target)) {
           moves.add(target);
         }
       }
-    }else{
+    } else {
       int target = leftUpMove(position);
-      if (target!=null){
-        if(!arrangement.pieces.containsKey(target)){
+      if (target != null) {
+        if (!arrangement.pieces.containsKey(target)) {
           moves.add(target);
         }
       }
       target = rightUpMove(position);
-      if (target!=null){
-        if(!arrangement.pieces.containsKey(target)){
+      if (target != null) {
+        if (!arrangement.pieces.containsKey(target)) {
           moves.add(target);
         }
       }
@@ -67,33 +73,36 @@ class Piece {
 
   static int leftUpMove(int origin) {
     if (origin < 8 || origin % 8 == 0) return null;
-    return origin - 9;
+    return origin + LEFT_UP;
   }
 
   static int leftDownMove(int origin) {
     if (origin > 55 || origin % 8 == 0) return null;
-    return origin + 7;
+    return origin + LEFT_DOWN;
   }
 
   static int rightUpMove(int origin) {
     if (origin < 8 || origin % 8 == 7) return null;
-    return origin - 7;
+    return origin + RIGHT_UP;
   }
 
   static int rightDownMove(int origin) {
     if (origin > 55 || origin % 8 == 7) return null;
-    return origin + 9;
+    return origin + RIGHT_DOWN;
   }
-  static int stepMove(int origin,int step){
-    if(step>0){ // DOWN
-      if(origin > 55) return null;
-    }else{  // UP
-      if(origin < 8) return null;
+
+  static int stepMove(int origin, int step) {
+    if (step > 0) {
+      // DOWN
+      if (origin > 55) return null;
+    } else {
+      // UP
+      if (origin < 8) return null;
     }
-    int originRow = (origin/8).floor();
-    int target = origin+step;
-    int targetRow = (target/8).floor();
-    if((originRow-targetRow).abs()!=1) return null;
+    int originRow = (origin / 8).floor();
+    int target = origin + step;
+    int targetRow = (target / 8).floor();
+    if ((originRow - targetRow).abs() != 1) return null;
     return target;
   }
 
@@ -125,6 +134,7 @@ class Piece {
       }
     }
   }
+
   bool canRightJump(int origin, Arrangement arrangement) {
     int target;
     if (isBlack) {
