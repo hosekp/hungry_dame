@@ -15,7 +15,8 @@ class CurrentState extends State {
 
   CurrentState() {
     possibleFinder.state = this;
-    arrangement = new Arrangement.start();
+//    arrangement = new Arrangement.start();
+    arrangement = new Arrangement.testChained();
     findPlayablePieces();
 //    possiblesChanged.announce("possibleChanged","");
   }

@@ -66,22 +66,22 @@ class Piece {
   }
 
   static int leftUpMove(int origin) {
-    if (origin % 8 == 0) return null;
+    if (origin < 8 || origin % 8 == 0) return null;
     return origin - 9;
   }
 
   static int leftDownMove(int origin) {
-    if (origin % 8 == 0) return null;
+    if (origin > 55 || origin % 8 == 0) return null;
     return origin + 7;
   }
 
   static int rightUpMove(int origin) {
-    if (origin % 8 == 7) return null;
+    if (origin < 8 || origin % 8 == 7) return null;
     return origin - 7;
   }
 
   static int rightDownMove(int origin) {
-    if (origin % 8 == 7) return null;
+    if (origin > 55 || origin % 8 == 7) return null;
     return origin + 9;
   }
 
