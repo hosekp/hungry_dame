@@ -7,11 +7,9 @@ class State {
   bool blackIsPlaying = false;
   bool isForced;
 
-
-
   void findPlayablePieces() {
     playablePieces.clear();
-    isForced=true;
+    isForced = true;
     if (chainedPiece != null) {
       playablePieces.add(chainedPiece);
       return;
@@ -32,27 +30,27 @@ class State {
     }
     if (playablePieces.length > 0) return;
     playablePieces.addAll(playingPieces);
-    isForced=false;
+    isForced = false;
   }
 
-  void removePieceInLine(int from,int to,Arrangement arrangement){
-    int diff = to-from;
+  void removePieceInLine(int from, int to, Arrangement arrangement) {
+    int diff = to - from;
     int step;
-    if(diff>0){
-      step=diff%7==0?7:9;
-    }else{
-      step=-diff%7==0?-7:-9;
+    if (diff > 0) {
+      step = diff % 7 == 0 ? 7 : 9;
+    } else {
+      step = -diff % 7 == 0 ? -7 : -9;
     }
-    int mover=from;
-    while(mover!=to){
-      mover+=step;
-      Piece piece=arrangement.pieces[mover];
-      if(piece!=null){
+    int mover = from;
+    while (mover != to) {
+      mover += step;
+      Piece piece = arrangement.pieces[mover];
+      if (piece != null) {
         arrangement.remove(piece);
         return;
       }
     }
   }
-  
-  bool isEndOfGame()=> !arrangement.pieces.values.any((Piece piece)=>piece.isBlack!=blackIsPlaying);
+
+  bool isEndOfGame() => !arrangement.pieces.values.any((Piece piece) => piece.isBlack != blackIsPlaying);
 }

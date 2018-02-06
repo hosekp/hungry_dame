@@ -11,6 +11,7 @@ class Arrangement {
   Arrangement.testChained() : pieces = _initialPieces([12, 28], [19, 1, 5]) {}
   Arrangement.testDame() : pieces = _initialPieces([35,44], [26,21,14],[35]) {}
   Arrangement.testEnd() : pieces = _initialPieces([35], [26,10],[35]) {}
+  Arrangement.testPromote() : pieces = _initialPieces([17], [12,10]) {}
 
   static Iterable<int> _whiteInitial() {
     return _blackInitial().map((i) => 63 - i);

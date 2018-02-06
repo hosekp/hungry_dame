@@ -163,4 +163,19 @@ class Piece implements AbstractPiece {
       }
     }
   }
+
+  Dame promote(Arrangement arrangement){
+    if(isDame) return this;
+    Dame dame = new Dame(pos: position,black: isBlack);
+    arrangement.pieces[dame.position]=dame;
+    return dame;
+  }
+  bool shouldPromote() {
+    if (isDame) return false;
+    if (isBlack) {
+      return position > 53;
+    } else {
+      return position < 8;
+    }
+  }
 }
