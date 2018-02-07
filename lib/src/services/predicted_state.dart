@@ -64,5 +64,4 @@ class PredictedState extends State{
       return 0.0;
     }
   }
-  int get stepsToMat => (score/1000000).abs().floor();
 }

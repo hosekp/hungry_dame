@@ -14,15 +14,10 @@ class Predictor {
   Predictor() {}
 
   void predict(CurrentState currentState) {
-    currentState.findPlayablePieces();
     predictions = prepareMoves(currentState);
     for (PredictedState state in predictions) {
       predictForState(state, 1);
       computeTreeCost(state);
-    }
-    predictions.sort((PredictedState a, PredictedState b) => a.score.compareTo(b.score));
-    if (!currentState.blackIsPlaying) {
-      predictions = predictions.reversed.toList();
     }
     onPrediction.notify();
   }
@@ -72,6 +67,9 @@ class Predictor {
           bestScore = subState.score;
         }
       }
+    }
+    if (bestScore.abs() >= 1000000) {
+      bestScore += 1000000 * bestScore.sign;
     }
     state.score = bestScore;
     return bestScore;

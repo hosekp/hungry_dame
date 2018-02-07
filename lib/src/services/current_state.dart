@@ -72,6 +72,7 @@ class CurrentState extends State {
     chainedPiece = piece;
     findPlayablePieces();
     setActivePiece(piece);
+    nextRoundChanged.notify();
   }
 
   void move(Piece piece, int position) {
