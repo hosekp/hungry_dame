@@ -9,9 +9,10 @@ class Arrangement {
   }
 
   Arrangement.testChained() : pieces = _initialPieces([12, 28], [19, 1, 5]) {}
-  Arrangement.testDame() : pieces = _initialPieces([35,44], [26,21,14],[35]) {}
-  Arrangement.testEnd() : pieces = _initialPieces([35], [26,10],[35]) {}
-  Arrangement.testPromote() : pieces = _initialPieces([17], [12,10]) {}
+  Arrangement.testDame() : pieces = _initialPieces([35, 44], [26, 21, 14], [35]) {}
+  Arrangement.testEnd() : pieces = _initialPieces([35], [26, 10], [35]) {}
+  Arrangement.testPromote() : pieces = _initialPieces([17], [12, 10]) {}
+  Arrangement.copy(Arrangement arrangement) : pieces = _copyPieces(arrangement.pieces);
 
   static Iterable<int> _whiteInitial() {
     return _blackInitial().map((i) => 63 - i);
@@ -25,16 +26,33 @@ class Arrangement {
     for (int pos in blacks) {
       initialPieces[pos] = new Piece(pos: pos, black: true);
     }
-    if(dames!=null){
+    if (dames != null) {
       for (int pos in dames) {
         Piece oldPiece = initialPieces[pos];
-        initialPieces[pos] = new Dame(pos: pos,black: oldPiece.isBlack);
+        initialPieces[pos] = new Dame(pos: pos, black: oldPiece.isBlack);
       }
     }
     return initialPieces;
   }
 
+  static _copyPieces(Map<int, Piece> oldPieces) {
+    Map<int, Piece> newPieces = {};
+    oldPieces.forEach((int pos, Piece piece) {
+      newPieces[pos] = piece.copy();
+    });
+    return newPieces;
+  }
+
   void remove(Piece piece) {
     pieces.remove(piece.position);
+  }
+
+  String get id {
+    StringBuffer result = new StringBuffer();
+    for (int i = 0; i < 64; i++) {
+      Piece piece = pieces[i];
+      result.write(piece == null ? "-" : piece.letter);
+    }
+    return result.toString();
   }
 }

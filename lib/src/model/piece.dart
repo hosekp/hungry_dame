@@ -14,6 +14,7 @@ class Piece implements AbstractPiece {
     position = pos;
   }
   bool get isWhite => !isBlack;
+  String get letter => isBlack?"b":"w";
   bool isForced(Arrangement arrangement) {
     if (canLeftJump(position, arrangement)) return true;
     if (canRightJump(position, arrangement)) return true;
@@ -177,5 +178,8 @@ class Piece implements AbstractPiece {
     } else {
       return position < 8;
     }
+  }
+  Piece copy(){
+    return new Piece(pos:position,black: isBlack);
   }
 }

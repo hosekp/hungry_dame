@@ -3,6 +3,9 @@ part of model;
 class Dame extends Piece implements AbstractPiece {
   bool isDame = true;
   Dame({int pos, bool black: false}) : super(black: black, pos: pos);
+
+  String get letter => isBlack?"B":"W";
+
   bool isForced(Arrangement arrangement) {
     if (canStepJump(position, Piece.LEFT_UP, arrangement)) return true;
     if (canStepJump(position, Piece.LEFT_DOWN, arrangement)) return true;
@@ -21,9 +24,6 @@ class Dame extends Piece implements AbstractPiece {
         if (neighbour.isBlack == isBlack) return false;
         target = Piece.stepMove(target, step);
         if (target == null) return false;
-        if(!arrangement.pieces.containsKey(target)){
-          print("Can jump $step");
-        }
         return !arrangement.pieces.containsKey(target);
       }
     }
@@ -76,5 +76,8 @@ class Dame extends Piece implements AbstractPiece {
       if (arrangement.pieces.containsKey(target)) return;
       moves.add(target);
     }
+  }
+  Piece copy(){
+    return new Dame(pos:position,black: isBlack);
   }
 }

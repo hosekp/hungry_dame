@@ -36,7 +36,7 @@ class VictoryModal {
 
   VictoryModal(this.currentState, this.changeDetector){
     isBlackWinner=currentState.blackIsPlaying;
-    currentState.gameEnded.add((){
+    currentState.gameEndedChanged.add((){
       if(!currentState.isEndOfGame()) return;
       isVisible=true;
       isBlackWinner=currentState.blackIsPlaying;

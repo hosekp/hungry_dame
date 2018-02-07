@@ -8,9 +8,9 @@ class CurrentState extends State {
   Arrangement arrangement;
   final PossibleFinder possibleFinder = new PossibleFinder();
   final Notificator activePieceChanged = new Notificator();
-  final Notificator blackIsPlayingChanged = new Notificator();
+  final Notificator nextRoundChanged = new Notificator();
   final Notificator possiblesChanged = new Notificator();
-  final Notificator gameEnded = new Notificator();
+  final Notificator gameEndedChanged = new Notificator();
   Piece activePiece;
   List<int> possibleFields;
 
@@ -22,14 +22,14 @@ class CurrentState extends State {
     isForced = false;
     chainedPiece = null;
     blackIsPlaying = false;
-    blackIsPlayingChanged.notify();
 //    arrangement = new Arrangement.start();
 //    arrangement = new Arrangement.testChained();
-//    arrangement = new Arrangement.testDame();
-    arrangement = new Arrangement.testEnd();
-    arrangement = new Arrangement.testPromote();
+    arrangement = new Arrangement.testDame();
+//    arrangement = new Arrangement.testEnd();
+//    arrangement = new Arrangement.testPromote();
     findPlayablePieces();
     setActivePiece(null);
+    nextRoundChanged.notify();
 //    possiblesChanged.announce("possibleChanged","");
   }
 
@@ -51,11 +51,7 @@ class CurrentState extends State {
       possiblesChanged.notify();
       return;
     }
-    if (isForced) {
-      possibleFields = activePiece.possibleForcedMoves(arrangement);
-    } else {
-      possibleFields = activePiece.possibleMoves(arrangement);
-    }
+    possibleFields = findPossiblesForPiece(activePiece);
     possiblesChanged.notify();
   }
 
@@ -63,13 +59,13 @@ class CurrentState extends State {
     isForced = false;
     chainedPiece = null;
     if (isEndOfGame()) {
-      gameEnded.notify();
+      gameEndedChanged.notify();
       return;
     }
     blackIsPlaying = !blackIsPlaying;
-    blackIsPlayingChanged.notify();
     findPlayablePieces();
     setActivePiece(null);
+    nextRoundChanged.notify();
   }
 
   void chainedMove(Piece piece) {
