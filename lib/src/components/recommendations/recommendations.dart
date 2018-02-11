@@ -15,6 +15,7 @@ part 'prediction.dart';
   directives: const [MaterialButtonComponent,NgFor],
   template: """
     <material-button raised (click)='predict()'>Predict</material-button>
+    <div>Depth: {{predictor.currentDepth}} Step: {{predictor.currentStep}}</div>
     <div *ngFor='let prediction of recommendations'>
       {{lastPieceLabel(prediction)}} to {{prediction.lastMoveTarget}}: {{scoreLabel(prediction)}}
     </div>

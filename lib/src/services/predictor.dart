@@ -1,77 +1,72 @@
+import 'dart:async';
+import 'dart:isolate' as isolateLib;
 import 'package:angular/di.dart';
-import 'package:hungry_dame/src/model/model.dart';
 import 'package:hungry_dame/src/services/current_state.dart';
+import 'package:hungry_dame/src/isolates/message_bus.dart';
 import 'package:hungry_dame/src/services/notificator.dart';
 import 'package:hungry_dame/src/services/predicted_state.dart';
-import 'package:hungry_dame/src/services/state.dart';
+//import 'package:hungry_dame/src/services/predictor_isolate.dart';
 
 @Injectable()
 class Predictor {
-  static const int MAX_DEPTH = 5;
+  static const int MAX_DEPTH = 7;
+  static const int MAX_STEPS = 100;
   List<PredictedState> predictions = [];
   Notificator onPrediction = new Notificator();
+  int currentDepth = 0;
+  int currentStep = 0;
+  isolateLib.ReceivePort portFromIsolate = new isolateLib.ReceivePort();
+  isolateLib.Isolate isolate;
+  isolateLib.SendPort portToIsolate;
+  isolateLib.ReceivePort onExit = new isolateLib.ReceivePort();
 
-  Predictor() {}
+  Predictor() {
+    portFromIsolate.listen(onResponse);
+    onExit.listen((_){
+      print("Isolate died: $_");
+    });
+    Uri uri = Uri.parse("/predictor_isolate.dart");
+    isolateLib.Isolate
+        .spawnUri(uri, [], portFromIsolate.sendPort, checked: true,errorsAreFatal: true,onError: onExit.sendPort)
+        .then((isolateLib.Isolate freshIsolate) {
+      isolate = freshIsolate;
+    });
+//    treeUpdated.add(() {
+//      predictions.forEach(computeTreeCost);
+//      onPrediction.notify();
+//    });
+  }
 
   void predict(CurrentState currentState) {
-    predictions = prepareMoves(currentState);
-    for (PredictedState state in predictions) {
-      predictForState(state, 1);
-      computeTreeCost(state);
+    if (portToIsolate == null) {
+      delay().then((_) {
+        predict(currentState);
+      });
+      return;
+    }
+    portToIsolate.send(MessageBus.toInitMessage(currentState));
+  }
+
+  void onResponse(rawMessage) {
+    if(rawMessage is isolateLib.SendPort){
+      portToIsolate = rawMessage;
+    }
+    if(rawMessage is String){
+      print(rawMessage);
+    }
+    if (rawMessage is! List) return;
+    predictions.clear();
+    List<Map<String, dynamic>> messages = rawMessage;
+    for (Map<String, dynamic> message in messages) {
+      if (message["steps"] != null) {
+        currentStep = message["steps"];
+        currentDepth = message["depth"];
+      } else {
+        predictions.add(MessageBus.fromMessage(message));
+      }
     }
     onPrediction.notify();
   }
 
-  void predictForState(PredictedState state, int depth) {
-    state.findPlayablePieces();
-    List<PredictedState> predictions = prepareMoves(state);
-    state.subPredictions = predictions;
-    if (depth >= MAX_DEPTH) return;
-    for (PredictedState subState in predictions) {
-      predictForState(subState, depth + 1);
-    }
-  }
-
-  List<PredictedState> prepareMoves(State source) {
-    List<PredictedState> predictions = [];
-    for (Piece playablePiece in source.playablePieces) {
-      List<int> possibles = source.findPossiblesForPiece(playablePiece);
-      if (possibles.length == 0) continue;
-      for (int target in possibles) {
-        PredictedState predictedState = new PredictedState.move(source, playablePiece, target);
-        predictions.add(predictedState);
-      }
-    }
-    return predictions;
-  }
-
-  double computeTreeCost(PredictedState state) {
-    double bestScore;
-    if (state.subPredictions == null || state.subPredictions.length == 0) {
-      state.score = state.innerScore;
-      return state.innerScore;
-    }
-    for (PredictedState subState in state.subPredictions) {
-      computeTreeCost(subState);
-      if (bestScore == null) {
-        bestScore = subState.score;
-        continue;
-      }
-
-      if (state.blackIsPlaying) {
-        if (bestScore > subState.score) {
-          bestScore = subState.score;
-        }
-      } else {
-        if (bestScore < subState.score) {
-          bestScore = subState.score;
-        }
-      }
-    }
-    if (bestScore.abs() >= 1000000) {
-      bestScore += 1000000 * bestScore.sign;
-    }
-    state.score = bestScore;
-    return bestScore;
-  }
+  Future delay() => new Future.delayed(const Duration(milliseconds: 10));
 }

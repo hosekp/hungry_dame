@@ -6,7 +6,7 @@ class PredictedState extends State{
   static const double PIECE_VALUE = 1.0;
   Piece lastMovedPiece; // do not belong to arrangement
   int lastMoveTarget;
-  double score;
+  double score=0.0;
   double innerScore;
   List<PredictedState> subPredictions;
 
@@ -35,6 +35,19 @@ class PredictedState extends State{
       blackIsPlaying = !blackIsPlaying;
     }
     innerScore = computeScore();
+  }
+  PredictedState.allData(Arrangement arrangement,bool black,bool isChained,int origin, int target, double score){
+    this.arrangement=arrangement;
+    blackIsPlaying=black;
+    if(isChained){
+      chainedPiece=arrangement.pieces[target];
+    }
+    if(origin!=null){
+      lastMovedPiece=arrangement.pieces[target].copy();
+      lastMovedPiece.position=origin;
+      lastMoveTarget=target;
+      this.score=score;
+    }
   }
 
   double computeScore() {

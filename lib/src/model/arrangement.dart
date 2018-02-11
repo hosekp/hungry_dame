@@ -13,6 +13,7 @@ class Arrangement {
   Arrangement.testEnd() : pieces = _initialPieces([35], [26, 10], [35]) {}
   Arrangement.testPromote() : pieces = _initialPieces([17], [12, 10]) {}
   Arrangement.copy(Arrangement arrangement) : pieces = _copyPieces(arrangement.pieces);
+  Arrangement.fromId(String id):pieces=_fromId(id);
 
   static Iterable<int> _whiteInitial() {
     return _blackInitial().map((i) => 63 - i);
@@ -41,6 +42,30 @@ class Arrangement {
       newPieces[pos] = piece.copy();
     });
     return newPieces;
+  }
+  static _fromId(String id){
+    Map<int, Piece> pieces = {};
+    int pos=0;
+    id.runes.forEach((int rune){
+      switch(rune){
+        case 66:
+          pieces[pos]=new Dame(pos: pos,black: true);
+          break;
+        case 87:
+          pieces[pos]=new Dame(pos: pos,black: false);
+          break;
+        case 98:
+          pieces[pos]=new Piece(pos: pos,black: true);
+          break;
+        case 119:
+          pieces[pos]=new Piece(pos: pos,black: false);
+          break;
+        default:
+          break;
+      }
+      pos++;
+    });
+    return pieces;
   }
 
   void remove(Piece piece) {
