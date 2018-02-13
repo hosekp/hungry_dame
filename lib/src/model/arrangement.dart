@@ -4,6 +4,8 @@ class Arrangement {
   final Map<int, Piece> pieces;
 
   Arrangement.start() : pieces = _initialPieces(_whiteInitial(), _blackInitial()) {}
+
+  Arrangement.testPredict():pieces = _initialPieces([35,44,63],[19,12,0]);
   static List<int> _blackInitial() {
     return const [1, 3, 5, 7, 8, 10, 12, 14, 17, 19, 21, 23];
   }

@@ -174,7 +174,7 @@ class Piece implements AbstractPiece {
   bool shouldPromote() {
     if (isDame) return false;
     if (isBlack) {
-      return position > 53;
+      return position > 55;
     } else {
       return position < 8;
     }

@@ -22,11 +22,12 @@ class CurrentState extends State {
     isForced = false;
     chainedPiece = null;
     blackIsPlaying = false;
-    arrangement = new Arrangement.start();
+//    arrangement = new Arrangement.start();
 //    arrangement = new Arrangement.testChained();
 //    arrangement = new Arrangement.testDame();
 //    arrangement = new Arrangement.testEnd();
 //    arrangement = new Arrangement.testPromote();
+    arrangement = new Arrangement.testPredict();
     findPlayablePieces();
     setActivePiece(null);
     nextRoundChanged.notify();

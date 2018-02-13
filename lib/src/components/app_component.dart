@@ -18,7 +18,7 @@ import 'package:hungry_dame/src/components/victory_modal.dart';
     styles: const [
       """
     :host{
-      opacity: 1;
+      opacity: 0.1;
       display: block;
     }
   """
