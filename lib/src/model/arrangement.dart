@@ -5,7 +5,6 @@ class Arrangement {
 
   Arrangement.start() : pieces = _initialPieces(_whiteInitial(), _blackInitial()) {}
 
-  Arrangement.testPredict():pieces = _initialPieces([35,44,63],[19,12,0]);
   static List<int> _blackInitial() {
     return const [1, 3, 5, 7, 8, 10, 12, 14, 17, 19, 21, 23];
   }
@@ -14,6 +13,8 @@ class Arrangement {
   Arrangement.testDame() : pieces = _initialPieces([35, 44], [26, 21, 14], [35]) {}
   Arrangement.testEnd() : pieces = _initialPieces([35], [26, 10], [35]) {}
   Arrangement.testPromote() : pieces = _initialPieces([17], [12, 10]) {}
+  Arrangement.testPredict():pieces = _initialPieces([35,44,62],[19,12,1]);
+
   Arrangement.copy(Arrangement arrangement) : pieces = _copyPieces(arrangement.pieces);
   Arrangement.fromId(String id):pieces=_fromId(id);
 

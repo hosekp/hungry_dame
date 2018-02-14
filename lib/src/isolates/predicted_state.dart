@@ -6,10 +6,6 @@ class PredictedState extends State {
   static const double PIECE_VALUE = 1.0;
   Piece lastMovedPiece; // do not belong to arrangement
   int lastMoveTarget;
-  double score = 0.0;
-//  List<PredictedState> subPredictions;
-//  int group;
-//  int depth;
   List<String> path=[];
 
   PredictedState.move(State previous, Piece oldPiece, int target) {
@@ -41,7 +37,7 @@ class PredictedState extends State {
     }
     path.add("${lastMovedPiece.letter}${lastMovedPiece.position}-$lastMoveTarget");
   }
-  PredictedState.allData(Arrangement arrangement, bool black, bool isChained, int origin, int target, double score) {
+  PredictedState.allData(Arrangement arrangement, bool black, bool isChained, int origin, int target) {
     this.arrangement = arrangement;
     blackIsPlaying = black;
     if (isChained) {
@@ -51,7 +47,6 @@ class PredictedState extends State {
       lastMovedPiece = arrangement.pieces[target].copy();
       lastMovedPiece.position = origin;
       lastMoveTarget = target;
-      this.score = score;
     }
   }
 
@@ -73,14 +68,17 @@ class PredictedState extends State {
         whiteScore += pieceValue;
       }
     }
-    if (whiteScore > blackScore) {
-      if (blackScore == 0) return 1000000.0;
-      return whiteScore / (blackScore + 0.00001);
-    } else if (blackScore > whiteScore) {
-      if (whiteScore == 0) return -1000000.0;
-      return -blackScore / (whiteScore + 0.00001);
-    } else {
-      return 0.0;
-    }
+    if (blackScore == 0) return 1000000.0;
+    if (whiteScore == 0) return -1000000.0;
+    return whiteScore - blackScore;
+//    if (whiteScore > blackScore) {
+//      if (blackScore == 0) return 1000000.0;
+//      return whiteScore / (blackScore + 0.00001);
+//    } else if (blackScore > whiteScore) {
+//      if (whiteScore == 0) return -1000000.0;
+//      return -blackScore / (whiteScore + 0.00001);
+//    } else {
+//      return 0.0;
+//    }
   }
 }

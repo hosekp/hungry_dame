@@ -4,8 +4,7 @@ import 'dart:isolate';
 
 import 'package:hungry_dame/src/isolates/message_bus.dart';
 import 'package:hungry_dame/src/isolates/predictor_job.dart';
-import 'package:hungry_dame/src/services/predicted_state.dart';
-import 'package:hungry_dame/src/services/state.dart';
+import 'package:hungry_dame/src/isolates/predicted_state.dart';
 
 class PredictorIsolate {
   SendPort portToMain;
@@ -18,11 +17,11 @@ class PredictorIsolate {
     sendPort.send(portFromMain.sendPort);
     portFromMain.listen((rawMessage) {
 //      print("Message from Main: $rawMessage");
-      predict(MessageBus.fromMessage(rawMessage));
+      predict(MessageBus.fromInitMessage(rawMessage));
     });
   }
 
-  void predict(State currentState) {
+  void predict(PredictedState currentState) {
 //    print("PredictorIsolate.predict(${currentState.id})");
     current = new PredictorJob(this);
     current.predict(currentState);

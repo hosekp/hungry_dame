@@ -5,7 +5,7 @@ import 'package:angular/core.dart';
 import 'package:angular/src/common/directives.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:hungry_dame/src/services/current_state.dart';
-import 'package:hungry_dame/src/services/predicted_state.dart';
+import 'package:hungry_dame/src/services/predict_result_state.dart';
 import 'package:hungry_dame/src/services/predictor.dart';
 
 part 'prediction.dart';
@@ -43,17 +43,21 @@ class RecommendationsComponent {
       predictor.predict(currentState);
     });
   }
-  String lastPieceLabel(PredictedState state) => "${state.lastMovedPiece.letter}${state.lastMovedPiece.position}";
-  String scoreLabel(PredictedState state) {
-    if (state.score > 1000) return "bílý MAT ${stepsToMat(state)}";
-    if (state.score < -1000) return "černý MAT ${stepsToMat(state)}";
+  String lastPieceLabel(PredictResultState state) => "${state.lastMovePieceLetter}${state.lastMoveOrigin}";
+  String scoreLabel(PredictResultState state) {
+    if (state.score > 1000) return "bílý MAT ${state.stepsToMat}";
+    if (state.score < -1000) return "černý MAT ${state.stepsToMat}";
     return state.score.toStringAsFixed(2);
   }
 
-  Iterable<PredictedState> get recommendations {
-    List<PredictedState> recommendations = predictor.predictions.toList()
-      ..sort((PredictedState a, PredictedState b) {
-        if (a.score.abs() > 10000 && b.score.abs() > 10000) return b.score.compareTo(a.score);
+  Iterable<PredictResultState> get recommendations {
+    List<PredictResultState> recommendations = predictor.predictions.toList()
+      ..sort((PredictResultState a, PredictResultState b) {
+        if(a.score.abs() > 10000){
+          if(b.score.abs() > 10000 && a.score.sign == b.score.sign){
+            return b.score.compareTo(a.score);
+          }
+        }
         return a.score.compareTo(b.score);
       });
     if (!currentState.blackIsPlaying) {
@@ -65,6 +69,4 @@ class RecommendationsComponent {
   void predict() {
     predictor.predict(currentState);
   }
-
-  int stepsToMat(PredictedState state) => (state.score / 2000000 + 0.5).abs().floor();
 }

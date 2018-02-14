@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:hungry_dame/src/isolates/message_bus.dart';
+import 'package:hungry_dame/src/isolates/predicted_state.dart';
 import 'package:hungry_dame/src/isolates/predictor_isolate.dart';
-import 'package:hungry_dame/src/services/predicted_state.dart';
 import 'package:hungry_dame/src/services/state.dart';
 
 class PredictorJob {
@@ -130,13 +130,16 @@ class PredictorJob {
 //      print(
 //          "${new List.generate(depth, (_)=>"-").join()} ${stateGroup[0].path.sublist(0,depth).join("|")} score: ${bestScore.toStringAsFixed(2)}");
     });
+    if (bestScore.abs() >= 1000000) {
+      bestScore += 1000000 * bestScore.sign;
+    }
     return bestScore;
   }
 
   Future delay() => new Future.delayed(const Duration(milliseconds: 0));
 
   void finish() {
-    _isFinished=true;
+    _isFinished = true;
     sendResults();
   }
 
@@ -144,13 +147,14 @@ class PredictorJob {
     print("sendResults");
     Iterable<PredictedState> allStates =
         [orphans, stateQueue].expand((f) => f).where((PredictedState state) => state != null);
+    List<Map<String, dynamic>> messages = [];
     for (PredictedState state in predictions) {
       String firstPath = state.path.first;
       List<PredictedState> group =
           allStates.where((PredictedState subState) => subState.path.first == firstPath).toList(growable: false);
-      state.score = computeTreeCost(group, 0);
+      double score = computeTreeCost(group, 0);
+      messages.add(MessageBus.toMessage(state, score));
     }
-    List messages = MessageBus.toMessageList(predictions);
     messages.add({"steps": currentStep, "depth": currentDepth});
     parent.portToMain.send(messages);
   }

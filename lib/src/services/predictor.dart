@@ -4,14 +4,11 @@ import 'package:angular/di.dart';
 import 'package:hungry_dame/src/services/current_state.dart';
 import 'package:hungry_dame/src/isolates/message_bus.dart';
 import 'package:hungry_dame/src/services/notificator.dart';
-import 'package:hungry_dame/src/services/predicted_state.dart';
-//import 'package:hungry_dame/src/services/predictor_isolate.dart';
+import 'package:hungry_dame/src/services/predict_result_state.dart';
 
 @Injectable()
 class Predictor {
-  static const int MAX_DEPTH = 7;
-  static const int MAX_STEPS = 100;
-  List<PredictedState> predictions = [];
+  List<PredictResultState> predictions = [];
   Notificator onPrediction = new Notificator();
   int currentDepth = 0;
   int currentStep = 0;
@@ -31,10 +28,6 @@ class Predictor {
         .then((isolateLib.Isolate freshIsolate) {
       isolate = freshIsolate;
     });
-//    treeUpdated.add(() {
-//      predictions.forEach(computeTreeCost);
-//      onPrediction.notify();
-//    });
   }
 
   void predict(CurrentState currentState) {
@@ -62,7 +55,7 @@ class Predictor {
         currentStep = message["steps"];
         currentDepth = message["depth"];
       } else {
-        predictions.add(MessageBus.fromMessage(message));
+        predictions.add(MessageBus.fromIsolateMessage(message));
       }
     }
     onPrediction.notify();
