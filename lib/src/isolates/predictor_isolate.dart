@@ -17,6 +17,12 @@ class PredictorIsolate {
     sendPort.send(portFromMain.sendPort);
     portFromMain.listen((rawMessage) {
 //      print("Message from Main: $rawMessage");
+      if (rawMessage is Map) {
+        if (rawMessage.containsKey("stop")) {
+          current = null;
+          return;
+        }
+      }
       predict(MessageBus.fromInitMessage(rawMessage));
     });
   }
@@ -27,11 +33,9 @@ class PredictorIsolate {
     current.predict(currentState);
   }
 
-
   Future delay() => new Future.delayed(const Duration(milliseconds: 10));
 
   void print(String message) {
     portToMain.send(message);
   }
-
 }

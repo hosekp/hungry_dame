@@ -15,6 +15,7 @@ part 'prediction.dart';
     directives: const [MaterialButtonComponent, NgFor],
     template: """
     <material-button raised (click)='predict()'>Predict</material-button>
+    <material-button raised (click)='stopPredict()'>Stop</material-button>
     <div class='step_counter'>Depth: {{predictor.currentDepth}} Step: {{predictor.currentStep}}</div>
     <div *ngFor='let prediction of recommendations'>
       {{lastPieceLabel(prediction)}} to {{prediction.lastMoveTarget}}: {{scoreLabel(prediction)}}
@@ -53,11 +54,6 @@ class RecommendationsComponent {
   Iterable<PredictResultState> get recommendations {
     List<PredictResultState> recommendations = predictor.predictions.toList()
       ..sort((PredictResultState a, PredictResultState b) {
-        if(a.score.abs() > 10000){
-          if(b.score.abs() > 10000 && a.score.sign == b.score.sign){
-            return b.score.compareTo(a.score);
-          }
-        }
         return a.score.compareTo(b.score);
       });
     if (!currentState.blackIsPlaying) {
@@ -68,5 +64,8 @@ class RecommendationsComponent {
 
   void predict() {
     predictor.predict(currentState);
+  }
+  void stopPredict(){
+    predictor.stop();
   }
 }

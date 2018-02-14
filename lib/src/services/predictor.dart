@@ -39,6 +39,9 @@ class Predictor {
     }
     portToIsolate.send(MessageBus.toInitMessage(currentState));
   }
+  void stop(){
+    portToIsolate.send({"stop":true});
+  }
 
   void onResponse(rawMessage) {
     if(rawMessage is isolateLib.SendPort){

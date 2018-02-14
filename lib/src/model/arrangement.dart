@@ -13,7 +13,8 @@ class Arrangement {
   Arrangement.testDame() : pieces = _initialPieces([35, 44], [26, 21, 14], [35]) {}
   Arrangement.testEnd() : pieces = _initialPieces([35], [26, 10], [35]) {}
   Arrangement.testPromote() : pieces = _initialPieces([17], [12, 10]) {}
-  Arrangement.testPredict():pieces = _initialPieces([35,44,62],[19,12,1]);
+//  Arrangement.testPredict():pieces = _initialPieces([35,44,62],[19,12,1]);
+  Arrangement.testPredict():pieces = _initialPieces([62],[51]);
 
   Arrangement.copy(Arrangement arrangement) : pieces = _copyPieces(arrangement.pieces);
   Arrangement.fromId(String id):pieces=_fromId(id);

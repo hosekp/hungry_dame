@@ -97,7 +97,7 @@ class PredictorJob {
       PredictedState orphan = stateGroup.first;
       if (orphan.path.length == depth) {
 //        print(
-//            "${new List.generate(depth, (_)=>"-").join()} ${orphan.path.sublist(0,depth).join("|")} score: ${orphan.computeScore().toStringAsFixed(2)}");
+//            "${new List.generate(depth-1, (_)=>".").join()}┌─ ${orphan.path.sublist(0,depth).join("|")} score: ${orphan.computeScore().toStringAsFixed(2)}");
         return orphan.computeScore();
       }
     }
@@ -127,12 +127,12 @@ class PredictorJob {
           bestScore = subGroupScore;
         }
       }
-//      print(
-//          "${new List.generate(depth, (_)=>"-").join()} ${stateGroup[0].path.sublist(0,depth).join("|")} score: ${bestScore.toStringAsFixed(2)}");
     });
-    if (bestScore.abs() >= 1000000) {
-      bestScore += 1000000 * bestScore.sign;
+    if (bestScore.abs() >= 100000) {
+      bestScore -= 1 * bestScore.sign;
     }
+//    print(
+//        "${new List.generate(depth, (_)=>".").join()}└ ${stateGroup[0].path.sublist(0,depth).join("|")} score: ${bestScore.toStringAsFixed(2)}");
     return bestScore;
   }
 
