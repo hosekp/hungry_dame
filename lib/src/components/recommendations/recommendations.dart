@@ -65,7 +65,8 @@ class RecommendationsComponent {
   void predict() {
     predictor.predict(currentState);
   }
-  void stopPredict(){
+
+  void stopPredict() {
     predictor.stop();
   }
 }

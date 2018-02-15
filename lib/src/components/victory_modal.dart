@@ -5,7 +5,7 @@ import 'package:hungry_dame/src/services/current_state.dart';
 
 @Component(
     selector: "victory-modal",
-    directives: const[MaterialDialogComponent,MaterialButtonComponent,ModalComponent,AutoFocusDirective,NgIf],
+    directives: const [MaterialDialogComponent, MaterialButtonComponent, ModalComponent, AutoFocusDirective, NgIf],
     template: """
     <modal [visible]='isVisible' >
       <material-dialog>
@@ -26,26 +26,25 @@ import 'package:hungry_dame/src/services/current_state.dart';
     </modal>
     """,
 //    host: const {"[ngIf]": "isVisible"},
-    styles: const [
-    ])
+    styles: const [])
 class VictoryModal {
   bool isBlackWinner;
-  bool isVisible=false;
+  bool isVisible = false;
   final CurrentState currentState;
   final ChangeDetectorRef changeDetector;
 
-  VictoryModal(this.currentState, this.changeDetector){
-    isBlackWinner=currentState.blackIsPlaying;
-    currentState.gameEndedChanged.add((){
-      if(!currentState.isEndOfGame()) return;
-      isVisible=true;
-      isBlackWinner=currentState.blackIsPlaying;
+  VictoryModal(this.currentState, this.changeDetector) {
+    isBlackWinner = currentState.blackIsPlaying;
+    currentState.gameEndedChanged.add(() {
+      if (!currentState.isEndOfGame()) return;
+      isVisible = true;
+      isBlackWinner = currentState.blackIsPlaying;
       changeDetector.detectChanges();
     });
   }
 
-  void close(){
-    isVisible=false;
+  void close() {
+    isVisible = false;
     currentState.reset();
   }
 

@@ -6,7 +6,6 @@ import 'package:hungry_dame/src/services/state.dart';
 @Injectable()
 class CurrentState extends State {
   Arrangement arrangement;
-  final PossibleFinder possibleFinder = new PossibleFinder();
   final Notificator activePieceChanged = new Notificator();
   final Notificator nextRoundChanged = new Notificator();
   final Notificator possiblesChanged = new Notificator();
@@ -15,19 +14,18 @@ class CurrentState extends State {
   List<int> possibleFields;
 
   CurrentState() {
-    possibleFinder.state = this;
     reset();
   }
   void reset() {
     isForced = false;
     chainedPiece = null;
     blackIsPlaying = false;
-//    arrangement = new Arrangement.start();
+    arrangement = new Arrangement.start();
 //    arrangement = new Arrangement.testChained();
 //    arrangement = new Arrangement.testDame();
 //    arrangement = new Arrangement.testEnd();
 //    arrangement = new Arrangement.testPromote();
-    arrangement = new Arrangement.testPredict();
+//    arrangement = new Arrangement.testPredict();
     findPlayablePieces();
     setActivePiece(null);
     nextRoundChanged.notify();

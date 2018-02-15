@@ -43,7 +43,7 @@ class Notificator {
 
   void announce(dynamic message, String category) {
     add(() {
-     print("$message, $category");
+      print("$message, $category");
     });
   }
 }

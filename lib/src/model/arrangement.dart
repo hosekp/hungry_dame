@@ -14,10 +14,10 @@ class Arrangement {
   Arrangement.testEnd() : pieces = _initialPieces([35], [26, 10], [35]) {}
   Arrangement.testPromote() : pieces = _initialPieces([17], [12, 10]) {}
 //  Arrangement.testPredict():pieces = _initialPieces([35,44,62],[19,12,1]);
-  Arrangement.testPredict():pieces = _initialPieces([62],[51]);
+  Arrangement.testPredict() : pieces = _initialPieces([62], [51]);
 
   Arrangement.copy(Arrangement arrangement) : pieces = _copyPieces(arrangement.pieces);
-  Arrangement.fromId(String id):pieces=_fromId(id);
+  Arrangement.fromId(String id) : pieces = _fromId(id);
 
   static Iterable<int> _whiteInitial() {
     return _blackInitial().map((i) => 63 - i);
@@ -47,22 +47,23 @@ class Arrangement {
     });
     return newPieces;
   }
-  static _fromId(String id){
+
+  static _fromId(String id) {
     Map<int, Piece> pieces = {};
-    int pos=0;
-    id.runes.forEach((int rune){
-      switch(rune){
+    int pos = 0;
+    id.runes.forEach((int rune) {
+      switch (rune) {
         case 66:
-          pieces[pos]=new Dame(pos: pos,black: true);
+          pieces[pos] = new Dame(pos: pos, black: true);
           break;
         case 87:
-          pieces[pos]=new Dame(pos: pos,black: false);
+          pieces[pos] = new Dame(pos: pos, black: false);
           break;
         case 98:
-          pieces[pos]=new Piece(pos: pos,black: true);
+          pieces[pos] = new Piece(pos: pos, black: true);
           break;
         case 119:
-          pieces[pos]=new Piece(pos: pos,black: false);
+          pieces[pos] = new Piece(pos: pos, black: false);
           break;
         default:
           break;

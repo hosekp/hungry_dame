@@ -13,7 +13,9 @@ part of chessboard;
       '[class.playable]': 'isPlayable',
       '[class.active]': 'isActive'
     },
-    styleUrls: const ["piece.css"])
+    styleUrls: const [
+      "piece.css"
+    ])
 class PieceComponent {
   @Input()
   Piece piece;

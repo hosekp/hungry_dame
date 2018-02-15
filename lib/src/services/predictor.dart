@@ -19,12 +19,12 @@ class Predictor {
 
   Predictor() {
     portFromIsolate.listen(onResponse);
-    onExit.listen((_){
+    onExit.listen((_) {
       print("Isolate died: $_");
     });
     Uri uri = Uri.parse("/predictor_isolate.dart");
     isolateLib.Isolate
-        .spawnUri(uri, [], portFromIsolate.sendPort, checked: true,errorsAreFatal: true,onError: onExit.sendPort)
+        .spawnUri(uri, [], portFromIsolate.sendPort, checked: true, errorsAreFatal: true, onError: onExit.sendPort)
         .then((isolateLib.Isolate freshIsolate) {
       isolate = freshIsolate;
     });
@@ -39,15 +39,16 @@ class Predictor {
     }
     portToIsolate.send(MessageBus.toInitMessage(currentState));
   }
-  void stop(){
-    portToIsolate.send({"stop":true});
+
+  void stop() {
+    portToIsolate.send({"stop": true});
   }
 
   void onResponse(rawMessage) {
-    if(rawMessage is isolateLib.SendPort){
+    if (rawMessage is isolateLib.SendPort) {
       portToIsolate = rawMessage;
     }
-    if(rawMessage is String){
+    if (rawMessage is String) {
       print(rawMessage);
     }
     if (rawMessage is! List) return;

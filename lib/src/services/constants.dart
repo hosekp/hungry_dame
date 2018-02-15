@@ -1,0 +1,14 @@
+const int MAX_DEPTH = 12;
+const int MAX_STEPS = 100000;
+const HUNGRY_DAME = true;
+const double DAME_VALUE = 3.0;
+const double PIECE_VALUE = 1.0;
+const UPDATE_PERIOD = const Duration(milliseconds: 1000);
+const int LEFT_UP = -9;
+const int LEFT_DOWN = 7;
+const int RIGHT_UP = -7;
+const int RIGHT_DOWN = 9;
+const String BLACK_PIECE = "b";
+const String BLACK_DAME = "B";
+const String WHITE_PIECE = "w";
+const String WHITE_DAME = "W";

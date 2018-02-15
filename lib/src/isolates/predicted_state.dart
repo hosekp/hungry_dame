@@ -1,12 +1,11 @@
 import 'package:hungry_dame/src/model/model.dart';
+import 'package:hungry_dame/src/services/constants.dart';
 import 'package:hungry_dame/src/services/state.dart';
 
 class PredictedState extends State {
-  static const double DAME_VALUE = 3.0;
-  static const double PIECE_VALUE = 1.0;
   Piece lastMovedPiece; // do not belong to arrangement
   int lastMoveTarget;
-  List<String> path=[];
+  List<String> path = [];
 
   PredictedState.move(State previous, Piece oldPiece, int target) {
     lastMoveTarget = target;
@@ -32,7 +31,7 @@ class PredictedState extends State {
       chainedPiece = null;
       blackIsPlaying = !blackIsPlaying;
     }
-    if(previous is PredictedState){
+    if (previous is PredictedState) {
       path.addAll(previous.path);
     }
     path.add("${lastMovedPiece.letter}${lastMovedPiece.position}-$lastMoveTarget");
@@ -68,9 +67,15 @@ class PredictedState extends State {
         whiteScore += pieceValue;
       }
     }
-    if (blackScore == 0) return 1000000.0;
-    if (whiteScore == 0) return -1000000.0;
-    return whiteScore - blackScore;
+    if (HUNGRY_DAME) {
+      if (blackScore == 0) return -1000000.0;
+      if (whiteScore == 0) return 1000000.0;
+      return blackScore - whiteScore;
+    } else {
+      if (blackScore == 0) return 1000000.0;
+      if (whiteScore == 0) return -1000000.0;
+      return whiteScore - blackScore;
+    }
 //    if (whiteScore > blackScore) {
 //      if (blackScore == 0) return 1000000.0;
 //      return whiteScore / (blackScore + 0.00001);

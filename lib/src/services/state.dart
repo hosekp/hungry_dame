@@ -34,7 +34,8 @@ class State {
     playablePieces.addAll(playingPieces);
     isForced = false;
   }
-  List<int> findPossiblesForPiece(Piece piece){
+
+  List<int> findPossiblesForPiece(Piece piece) {
     if (isForced) {
       return piece.possibleForcedMoves(arrangement);
     } else {
@@ -61,7 +62,8 @@ class State {
     }
   }
 
-  String get id => "${arrangement.id}|${blackIsPlaying?"B":"W"}${chainedPiece==null?"":"|"+chainedPiece.position.toString()}";
+  String get id =>
+      "${arrangement.id}|${blackIsPlaying?"B":"W"}${chainedPiece==null?"":"|"+chainedPiece.position.toString()}";
 
   bool isEndOfGame() => !arrangement.pieces.values.any((Piece piece) => piece.isBlack != blackIsPlaying);
 }

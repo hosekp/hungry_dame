@@ -4,21 +4,19 @@ import 'dart:collection';
 import 'package:hungry_dame/src/isolates/message_bus.dart';
 import 'package:hungry_dame/src/isolates/predicted_state.dart';
 import 'package:hungry_dame/src/isolates/predictor_isolate.dart';
+import 'package:hungry_dame/src/services/constants.dart';
 import 'package:hungry_dame/src/services/state.dart';
 
 class PredictorJob {
-  static const int MAX_DEPTH = 12;
-  static const int MAX_STEPS = 100000;
-  static const HUNGRY_DAME = false;
   List<PredictedState> predictions = [];
   List<PredictedState> orphans = [];
   int currentDepth = 1;
   int currentStep = 0;
   ListQueue<PredictedState> stateQueue = new ListQueue<PredictedState>();
   final PredictorIsolate parent;
-  static const UPDATE_PERIOD = const Duration(milliseconds: 1000);
   DateTime lastUpdateTime;
   bool _isFinished = false;
+  final RegExp whiteRegexp = new RegExp("$WHITE_DAME|$WHITE_PIECE");
 
   PredictorJob(this.parent);
 
@@ -116,7 +114,7 @@ class PredictorJob {
         return;
       }
 //      print("$pathPart $bestScore ${bestScore > subGroupScore?">":"<="} $subGroupScore");
-      if (pathPart.startsWith(new RegExp("W|w")) != HUNGRY_DAME) {
+      if (pathPart.startsWith(whiteRegexp)) {
         if (bestScore < subGroupScore) {
 //          print("New best: $bestScore=>$subGroupScore for $pathPart");
           bestScore = subGroupScore;

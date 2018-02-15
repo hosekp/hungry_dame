@@ -1,20 +1,20 @@
 part of model;
 
 class Piece implements AbstractPiece {
-  static const int LEFT_UP = -9;
-  static const int LEFT_DOWN = 7;
-  static const int RIGHT_UP = -7;
-  static const int RIGHT_DOWN = 9;
   bool isBlack = false;
   bool isDame = false;
   int position;
+
   Piece({bool black: false, int pos: null}) {
     assert(pos != null);
     isBlack = black;
     position = pos;
   }
+
   bool get isWhite => !isBlack;
-  String get letter => isBlack?"b":"w";
+
+  String get letter => isBlack ? BLACK_PIECE : WHITE_PIECE;
+
   bool isForced(Arrangement arrangement) {
     if (canLeftJump(position, arrangement)) return true;
     if (canRightJump(position, arrangement)) return true;
@@ -165,12 +165,13 @@ class Piece implements AbstractPiece {
     }
   }
 
-  Dame promote(Arrangement arrangement){
-    if(isDame) return this;
-    Dame dame = new Dame(pos: position,black: isBlack);
-    arrangement.pieces[dame.position]=dame;
+  Dame promote(Arrangement arrangement) {
+    if (isDame) return this;
+    Dame dame = new Dame(pos: position, black: isBlack);
+    arrangement.pieces[dame.position] = dame;
     return dame;
   }
+
   bool shouldPromote() {
     if (isDame) return false;
     if (isBlack) {
@@ -179,7 +180,8 @@ class Piece implements AbstractPiece {
       return position < 8;
     }
   }
-  Piece copy(){
-    return new Piece(pos:position,black: isBlack);
+
+  Piece copy() {
+    return new Piece(pos: position, black: isBlack);
   }
 }
