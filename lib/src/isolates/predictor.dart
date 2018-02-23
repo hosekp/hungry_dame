@@ -1,61 +1,96 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'dart:isolate';
 import 'package:hungry_dame/src/isolates/message_bus.dart';
 import 'package:hungry_dame/src/isolates/predicted_state.dart';
-import 'package:hungry_dame/src/isolates/predictor_isolate.dart';
 import 'package:hungry_dame/src/services/constants.dart';
 import 'package:hungry_dame/src/services/state.dart';
 
-class PredictorJob {
+class Predictor {
+  SendPort portToMain;
+  ReceivePort portFromMain = new ReceivePort();
   List<PredictedState> predictions = [];
   List<PredictedState> orphans = [];
-  int currentDepth = 1;
-  int currentStep = 0;
   ListQueue<PredictedState> stateQueue = new ListQueue<PredictedState>();
-  final PredictorIsolate parent;
+  double currentDepth;
+  int currentStep = 0;
   DateTime lastUpdateTime;
-  bool _isFinished = false;
+  bool _paused = false;
   final RegExp whiteRegexp = new RegExp("$WHITE_DAME|$WHITE_PIECE");
 
-  PredictorJob(this.parent);
+  void init(SendPort sendPort) {
+    portToMain = sendPort;
+    sendPort.send(portFromMain.sendPort);
+    portFromMain.listen((rawMessage) {
+//      print("Message from Main: $rawMessage");
+      if (rawMessage is Map) {
+        if (rawMessage.containsKey("stop")) {
+          pause();
+          return;
+        }
+      }
+      predict(MessageBus.fromInitMessage(rawMessage));
+    });
+  }
 
-  bool get isKilled => _isFinished || parent.current != this;
+  void reset([PredictedState chosenDummy]) {
+//    currentDepth=0;
+    currentStep = 0;
+    PredictedState chosenState;
+    if (chosenDummy != null) {
+      chosenState = predictions.firstWhere((PredictedState state) => state.lastMoveTarget == chosenDummy.lastMoveTarget,
+          orElse: () => null);
+    }
+    if (chosenState != null) {
+      predictions = [];
+      String pathStep = chosenState.pathStep;
+      orphans = orphans
+          .where((PredictedState state) => state.path.length > 0 && state.path.first == pathStep)
+          .map((PredictedState state) => state..path.removeAt(0))
+          .toList();
+      Iterable<PredictedState> stateQueueTemp = stateQueue
+          .where((PredictedState state) => state.path.length > 0 && state.path.first == pathStep)
+          .map((PredictedState state) => state..path.removeAt(0));
+      stateQueue
+        ..clear()
+        ..addAll(stateQueueTemp);
+    } else {
+      predictions = [];
+      orphans = [];
+      stateQueue.clear();
+    }
+    currentDepth = 0.0;
+  }
 
-  void predict(State currentState) {
+  void predict(PredictedState currentState) {
+    reset(currentState);
+
 //    print("predict(${currentState.id})");
     currentState.findPlayablePieces();
     predictions = prepareMoves(currentState);
     if (predictions.length == 0) {
-      return finish();
+      return pause();
     }
-    for (PredictedState state in predictions) {
-      stateQueue.add(state);
+    if(stateQueue.length==0){
+      for (PredictedState state in predictions) {
+        stateQueue.add(state);
+      }
     }
-    stateQueue.add(null);
-    currentDepth++;
-
     lastUpdateTime = new DateTime.now();
     predictCycler();
   }
 
   void predictCycler() {
     for (int i = 0; i < 500; i++) {
-      if (isKilled) return null;
+      if (_paused) return null;
       if (stateQueue.length == 0) {
-        return finish();
+        return pause();
       }
       currentStep++;
       PredictedState state = stateQueue.removeFirst();
       List<PredictedState> states = predictForStateOneLevel(state);
-      if (states == null) {
-        currentStep--;
-        if (currentDepth >= MAX_DEPTH) {
-          return finish();
-        }
-        currentDepth++;
-        stateQueue.add(null);
-      } else if (states.length == 0) {
+      if (states.length == 0) {
         orphans.add(state);
       } else {
         stateQueue.addAll(states);
@@ -70,7 +105,6 @@ class PredictorJob {
   }
 
   List<PredictedState> predictForStateOneLevel(PredictedState state) {
-    if (state == null) return null;
     state.findPlayablePieces();
     List<PredictedState> predictions = prepareMoves(state);
     return predictions;
@@ -134,10 +168,10 @@ class PredictorJob {
     return bestScore;
   }
 
-  Future delay() => new Future.delayed(const Duration(milliseconds: 0));
+  Future delay() => new Future.delayed(const Duration(milliseconds: 1));
 
-  void finish() {
-    _isFinished = true;
+  void pause() {
+    _paused = true;
     sendResults();
   }
 
@@ -153,11 +187,24 @@ class PredictorJob {
       double score = computeTreeCost(group, 0);
       messages.add(MessageBus.toMessage(state, score));
     }
-    messages.add({"steps": currentStep, "depth": currentDepth});
-    parent.portToMain.send(messages);
+    currentDepth = computeDepth();
+    messages.add({"steps": stateQueue.length+orphans.length, "depth": currentDepth});
+    portToMain.send(messages);
+  }
+
+  double computeDepth() {
+//    if (currentStep == 0 && stateQueue.length == 0) return 0.0;
+    if (stateQueue.length == 0) return double.INFINITY;
+    int summedDepth=0;
+    int length = stateQueue.length;
+    for(double i=0.0;i<1;i+=0.01){
+      summedDepth+=stateQueue.elementAt((i*length).floor()).path.length;
+    }
+//    int summedDepth = stateQueue.fold<int>(0, (int sum, PredictedState state) => sum + state.path.length);
+    return summedDepth / 100.0;
   }
 
   void print(String message) {
-    parent.portToMain.send(message);
+    portToMain.send(message);
   }
 }

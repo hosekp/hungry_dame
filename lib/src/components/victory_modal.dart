@@ -1,6 +1,7 @@
 import 'package:angular/core.dart';
 import 'package:angular/src/common/directives.dart';
 import 'package:angular_components/angular_components.dart';
+import 'package:hungry_dame/src/services/constants.dart';
 import 'package:hungry_dame/src/services/current_state.dart';
 
 @Component(
@@ -34,11 +35,11 @@ class VictoryModal {
   final ChangeDetectorRef changeDetector;
 
   VictoryModal(this.currentState, this.changeDetector) {
-    isBlackWinner = currentState.blackIsPlaying;
+    isBlackWinner = currentState.blackIsPlaying != HUNGRY_DAME;
     currentState.gameEndedChanged.add(() {
       if (!currentState.isEndOfGame()) return;
       isVisible = true;
-      isBlackWinner = currentState.blackIsPlaying;
+      isBlackWinner = currentState.blackIsPlaying != HUNGRY_DAME;
       changeDetector.detectChanges();
     });
   }

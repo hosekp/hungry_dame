@@ -34,8 +34,10 @@ class PredictedState extends State {
     if (previous is PredictedState) {
       path.addAll(previous.path);
     }
-    path.add("${lastMovedPiece.letter}${lastMovedPiece.position}-$lastMoveTarget");
+    path.add(pathStep);
   }
+  String get pathStep =>"${lastMovedPiece.letter}${lastMovedPiece.position}-$lastMoveTarget";
+
   PredictedState.allData(Arrangement arrangement, bool black, bool isChained, int origin, int target) {
     this.arrangement = arrangement;
     blackIsPlaying = black;

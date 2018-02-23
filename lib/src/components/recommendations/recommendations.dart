@@ -6,32 +6,46 @@ import 'package:angular/src/common/directives.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:hungry_dame/src/services/current_state.dart';
 import 'package:hungry_dame/src/services/predict_result_state.dart';
-import 'package:hungry_dame/src/services/predictor.dart';
+import 'package:hungry_dame/src/services/predictor_gateway.dart';
 
 part 'prediction.dart';
 
 @Component(
     selector: "recommendations",
-    directives: const [MaterialButtonComponent, NgFor],
+    directives: const [MaterialButtonComponent, NgIf, NgFor],
     template: """
-    <material-button raised (click)='predict()'>Predict</material-button>
-    <material-button raised (click)='stopPredict()'>Stop</material-button>
-    <div class='step_counter'>Depth: {{predictor.currentDepth}} Step: {{predictor.currentStep}}</div>
-    <div *ngFor='let prediction of recommendations'>
-      {{lastPieceLabel(prediction)}} to {{prediction.lastMoveTarget}}: {{scoreLabel(prediction)}}
-    </div>
+    <div class='recommendation_switch' (click)='onSwitch()'></div>
+    <template [ngIf]='isVisible'>
+      <material-button raised (click)='predict()'>Predict</material-button>
+      <material-button raised (click)='stopPredict()'>Stop</material-button>
+      <div class='step_counter'>Depth: {{predictor.currentDepth}} Step: {{predictor.currentStep}}</div>
+      <div *ngFor='let prediction of recommendations'>
+        {{lastPieceLabel(prediction)}} to {{prediction.lastMoveTarget}}: {{scoreLabel(prediction)}}
+      </div>
+    </template>
   """,
+    host: const {
+      "*ngIf": "isVisible"
+    },
     styles: const [
       """
     .step_counter{
       border-bottom: 1px solid black;
     }
+    .recommendation_switch{
+      height: 50px;
+      width:50px;
+      position:absolute;
+      right:0;
+      top:0;
+    }
     """
     ])
 class RecommendationsComponent {
-  final Predictor predictor;
+  final PredictorGateway predictor;
   final ChangeDetectorRef changeDetector;
   final CurrentState currentState;
+  bool isVisible = true;
 
   RecommendationsComponent(this.predictor, this.changeDetector, this.currentState) {
     predictor.onPrediction.add(() {
@@ -45,6 +59,8 @@ class RecommendationsComponent {
     });
   }
   String lastPieceLabel(PredictResultState state) => "${state.lastMovePieceLetter}${state.lastMoveOrigin}";
+
+  String get currentDepth => predictor.currentDepth.toStringAsFixed(2);
   String scoreLabel(PredictResultState state) {
     if (state.score > 1000) return "bílý MAT ${state.stepsToMat}";
     if (state.score < -1000) return "černý MAT ${state.stepsToMat}";
@@ -68,5 +84,9 @@ class RecommendationsComponent {
 
   void stopPredict() {
     predictor.stop();
+  }
+  void onSwitch(){
+    isVisible=!isVisible;
+    changeDetector.detectChanges();
   }
 }

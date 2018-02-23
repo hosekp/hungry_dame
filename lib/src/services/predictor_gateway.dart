@@ -7,22 +7,22 @@ import 'package:hungry_dame/src/services/notificator.dart';
 import 'package:hungry_dame/src/services/predict_result_state.dart';
 
 @Injectable()
-class Predictor {
+class PredictorGateway {
   List<PredictResultState> predictions = [];
   Notificator onPrediction = new Notificator();
-  int currentDepth = 0;
+  double currentDepth = 0.0;
   int currentStep = 0;
   isolateLib.ReceivePort portFromIsolate = new isolateLib.ReceivePort();
   isolateLib.Isolate isolate;
   isolateLib.SendPort portToIsolate;
   isolateLib.ReceivePort onExit = new isolateLib.ReceivePort();
 
-  Predictor() {
+  PredictorGateway() {
     portFromIsolate.listen(onResponse);
     onExit.listen((_) {
       print("Isolate died: $_");
     });
-    Uri uri = Uri.parse("/predictor_isolate.dart");
+    Uri uri = Uri.parse("/predictor.dart");
     isolateLib.Isolate
         .spawnUri(uri, [], portFromIsolate.sendPort, checked: true, errorsAreFatal: true, onError: onExit.sendPort)
         .then((isolateLib.Isolate freshIsolate) {
