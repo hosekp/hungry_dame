@@ -5,7 +5,7 @@ part of chessboard;
     directives: const [PieceComponent, NgIf],
     template: """
     <div class='label-index'>{{index}}</div>
-    <piece [piece]='piece'></piece>
+    <piece [piece]='piece' [position]='index'></piece>
   """,
     host: const {
       '(click)': "onClick()",
@@ -53,10 +53,10 @@ class ChessFieldComponent {
     return currentState.possibleFields.contains(index);
   }
 
-  Piece get piece => currentState.arrangement.pieces[index];
+  Piece get piece => currentState.arrangement.getPieceAt(index);
 
   void onClick() {
     if (!currentState.possibleFields.contains(index)) return;
-    currentState.move(currentState.activePiece, index);
+    currentState.move(currentState.activePiece, currentState.activePiecePosition, index);
   }
 }

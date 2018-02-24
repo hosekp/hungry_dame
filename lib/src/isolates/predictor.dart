@@ -61,18 +61,19 @@ class Predictor {
       stateQueue.clear();
     }
     currentDepth = 0.0;
+    _paused = false;
   }
 
   void predict(PredictedState currentState) {
     reset(currentState);
 
-//    print("predict(${currentState.id})");
+    print("predict(${currentState.id}) stateQueue:${stateQueue.length} orphans:${orphans.length}");
     currentState.findPlayablePieces();
     predictions = prepareMoves(currentState);
     if (predictions.length == 0) {
       return pause();
     }
-    if(stateQueue.length==0){
+    if (stateQueue.length == 0) {
       for (PredictedState state in predictions) {
         stateQueue.add(state);
       }
@@ -112,11 +113,12 @@ class Predictor {
 
   List<PredictedState> prepareMoves(State source) {
     List<PredictedState> predictions = [];
-    for (var playablePiece in source.playablePieces) {
-      List<int> possibles = source.findPossiblesForPiece(playablePiece);
+    for (var piecePosition in source.playablePieces) {
+      List<int> possibles = source.findPossiblesForPiece(piecePosition);
       if (possibles.length == 0) continue;
       for (int target in possibles) {
-        PredictedState predictedState = new PredictedState.move(source, playablePiece, target);
+        PredictedState predictedState =
+            new PredictedState.move(source, source.arrangement.getPieceAt(piecePosition), piecePosition, target);
         predictions.add(predictedState);
       }
     }
@@ -188,17 +190,17 @@ class Predictor {
       messages.add(MessageBus.toMessage(state, score));
     }
     currentDepth = computeDepth();
-    messages.add({"steps": stateQueue.length+orphans.length, "depth": currentDepth});
+    messages.add({"steps": stateQueue.length + orphans.length, "depth": currentDepth});
     portToMain.send(messages);
   }
 
   double computeDepth() {
 //    if (currentStep == 0 && stateQueue.length == 0) return 0.0;
     if (stateQueue.length == 0) return double.INFINITY;
-    int summedDepth=0;
+    int summedDepth = 0;
     int length = stateQueue.length;
-    for(double i=0.0;i<1;i+=0.01){
-      summedDepth+=stateQueue.elementAt((i*length).floor()).path.length;
+    for (double i = 0.0; i < 1; i += 0.01) {
+      summedDepth += stateQueue.elementAt((i * length).floor()).path.length;
     }
 //    int summedDepth = stateQueue.fold<int>(0, (int sum, PredictedState state) => sum + state.path.length);
     return summedDepth / 100.0;

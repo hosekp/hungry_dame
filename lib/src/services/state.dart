@@ -1,9 +1,10 @@
 import 'package:hungry_dame/src/model/model.dart';
+import 'package:hungry_dame/src/services/constants.dart';
 
 class State {
   Arrangement arrangement;
-  Piece chainedPiece;
-  List<Piece> playablePieces = [];
+  int chainedPiece;
+  List<int> playablePieces = [];
   bool blackIsPlaying = false;
   bool isForced;
 
@@ -16,30 +17,58 @@ class State {
       playablePieces.add(chainedPiece);
       return;
     }
-    Iterable<Piece> playingPieces = arrangement.pieces.values.where((Piece piece) => piece.isBlack == blackIsPlaying);
-    Iterable<Dame> dames = playingPieces.where((Piece piece) => piece.isDame);
-    for (Dame dame in dames) {
-      if (dame.isForced(arrangement)) {
-        playablePieces.add(dame);
+    List<int> playingDames = [];
+    if (blackIsPlaying) {
+      arrangement.pieces.forEach((int position, int pieceCode) {
+        if (pieceCode == BLACK_DAME_CODE) {
+          playingDames.add(position);
+        }
+      });
+    } else {
+      arrangement.pieces.forEach((int position, int pieceCode) {
+        if (pieceCode == WHITE_DAME_CODE) {
+          playingDames.add(position);
+        }
+      });
+    }
+    for (int position in playingDames) {
+      Dame dame = arrangement.getPieceAt(position);
+      if (dame.isForced(position, arrangement)) {
+        playablePieces.add(position);
       }
     }
     if (playablePieces.length > 0) return;
-    Iterable<Piece> pieces = playingPieces.where((Piece piece) => !piece.isDame);
-    for (Piece piece in pieces) {
-      if (piece.isForced(arrangement)) {
-        playablePieces.add(piece);
+    List<int> playingPieces = [];
+    if (blackIsPlaying) {
+      arrangement.pieces.forEach((int position, int pieceCode) {
+        if (pieceCode == BLACK_PIECE_CODE) {
+          playingPieces.add(position);
+        }
+      });
+    } else {
+      arrangement.pieces.forEach((int position, int pieceCode) {
+        if (pieceCode == WHITE_PIECE_CODE) {
+          playingPieces.add(position);
+        }
+      });
+    }
+    for (int position in playingPieces) {
+      Piece piece = arrangement.getPieceAt(position);
+      if (piece.isForced(position, arrangement)) {
+        playablePieces.add(position);
       }
     }
     if (playablePieces.length > 0) return;
-    playablePieces.addAll(playingPieces);
+    playablePieces..addAll(playingDames)..addAll(playingPieces);
     isForced = false;
   }
 
-  List<int> findPossiblesForPiece(Piece piece) {
+  List<int> findPossiblesForPiece(int position) {
+    Piece piece = arrangement.getPieceAt(position);
     if (isForced) {
-      return piece.possibleForcedMoves(arrangement);
+      return piece.possibleForcedMoves(position, arrangement);
     } else {
-      return piece.possibleMoves(arrangement);
+      return piece.possibleMoves(position, arrangement);
     }
   }
 
@@ -54,16 +83,22 @@ class State {
     int mover = from;
     while (mover != to) {
       mover += step;
-      Piece piece = arrangement.pieces[mover];
-      if (piece != null) {
-        arrangement.remove(piece);
-        return;
-      }
+      arrangement.pieces.remove(mover);
     }
   }
 
-  String get id =>
-      "${arrangement.id}|${blackIsPlaying?"B":"W"}${chainedPiece==null?"":"|"+chainedPiece.position.toString()}";
+  String get id => "${arrangement.id}|${blackIsPlaying?"B":"W"}${chainedPiece==null?"":"|"+chainedPiece.toString()}";
 
-  bool isEndOfGame() => !arrangement.pieces.values.any((Piece piece) => piece.isBlack != blackIsPlaying);
+  bool isEndOfGame() {
+    if (blackIsPlaying) {
+      return !arrangement.pieces.values.any((int pieceType) {
+        return pieceType == WHITE_DAME_CODE || pieceType == WHITE_PIECE_CODE;
+      });
+    } else {
+      return !arrangement.pieces.values.any((int pieceType) {
+        return pieceType == BLACK_DAME_CODE || pieceType == BLACK_PIECE_CODE;
+      });
+    }
+  }
+//      !arrangement.pieces.values.any((Piece piece) => piece.isBlack != blackIsPlaying);
 }

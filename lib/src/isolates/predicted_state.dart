@@ -5,27 +5,27 @@ import 'package:hungry_dame/src/services/state.dart';
 class PredictedState extends State {
   Piece lastMovedPiece; // do not belong to arrangement
   int lastMoveTarget;
+  int lastMoveOrigin;
   List<String> path = [];
 
-  PredictedState.move(State previous, Piece oldPiece, int target) {
+  PredictedState.move(State previous, Piece piece, int origin, int target) {
     lastMoveTarget = target;
-    lastMovedPiece = oldPiece;
+    lastMovedPiece = piece;
+    lastMoveOrigin = origin;
     arrangement = new Arrangement.copy(previous.arrangement);
     isForced = previous.isForced;
     blackIsPlaying = previous.blackIsPlaying;
 
     if (isForced) {
-      removePieceInLine(oldPiece.position, target, arrangement);
+      removePieceInLine(origin, target, arrangement);
     }
-    Piece piece = arrangement.pieces[oldPiece.position];
-    arrangement.pieces[target] = piece;
-    arrangement.pieces.remove(oldPiece.position);
-    piece.position = target;
-    if (piece.shouldPromote()) {
-      piece = piece.promote(arrangement);
+    arrangement.pieces[target] = piece.code;
+    arrangement.pieces.remove(origin);
+    if (piece.shouldPromote(target)) {
+      piece.promote(target, arrangement);
     }
-    if (isForced && piece.isForced(arrangement)) {
-      chainedPiece = piece;
+    if (isForced && piece.isForced(target, arrangement)) {
+      chainedPiece = target;
     } else {
       isForced = false;
       chainedPiece = null;
@@ -36,7 +36,6 @@ class PredictedState extends State {
     }
     path.add(pathStep);
   }
-  String get pathStep =>"${lastMovedPiece.letter}${lastMovedPiece.position}-$lastMoveTarget";
 
   PredictedState.allData(Arrangement arrangement, bool black, bool isChained, int origin, int target) {
     this.arrangement = arrangement;
@@ -45,25 +44,26 @@ class PredictedState extends State {
       chainedPiece = arrangement.pieces[target];
     }
     if (origin != null) {
-      lastMovedPiece = arrangement.pieces[target].copy();
-      lastMovedPiece.position = origin;
+      lastMovedPiece = arrangement.getPieceAt(target);
       lastMoveTarget = target;
+      lastMoveOrigin = origin;
     }
   }
+  String get pathStep => "${lastMovedPiece.letter}${lastMoveOrigin}-$lastMoveTarget";
 
   double computeScore() {
     double whiteScore = 0.0;
     double blackScore = 0.0;
-    for (Piece piece in arrangement.pieces.values) {
+    for (int pieceCode in arrangement.pieces.values) {
       double pieceValue;
-      if (piece.isDame) {
+      if (pieceCode == BLACK_DAME_CODE || pieceCode == WHITE_DAME_CODE) {
         pieceValue = DAME_VALUE;
       } else {
 //        int row = (piece.position / 8).floor();
 //        pieceValue = PIECE_VALUE + PIECE_VALUE * (piece.isBlack ? row : 7 - row);
         pieceValue = PIECE_VALUE;
       }
-      if (piece.isBlack) {
+      if (pieceCode == BLACK_DAME_CODE || pieceCode == BLACK_PIECE_CODE) {
         blackScore += pieceValue;
       } else {
         whiteScore += pieceValue;

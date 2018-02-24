@@ -1,27 +1,26 @@
 part of model;
 
 class Piece implements AbstractPiece {
-  bool isBlack = false;
-  bool isDame = false;
-  int position;
+  final bool isBlack;
+  final bool isDame = false;
+  final int code;
+//  int position;
 
-  Piece({bool black: false, int pos: null}) {
-    assert(pos != null);
-    isBlack = black;
-    position = pos;
-  }
+  Piece({bool black: false, int code: 0})
+      : isBlack = black,
+        code = code == 0 ? (black ? BLACK_PIECE_CODE : WHITE_PIECE_CODE) : code {}
 
   bool get isWhite => !isBlack;
 
   String get letter => isBlack ? BLACK_PIECE : WHITE_PIECE;
 
-  bool isForced(Arrangement arrangement) {
+  bool isForced(int position, Arrangement arrangement) {
     if (canLeftJump(position, arrangement)) return true;
     if (canRightJump(position, arrangement)) return true;
     return false;
   }
 
-  List<int> possibleForcedMoves(Arrangement arrangement) {
+  List<int> possibleForcedMoves(int position, Arrangement arrangement) {
     List<int> moves = [];
     if (canLeftJump(position, arrangement)) {
       if (isBlack) {
@@ -40,7 +39,7 @@ class Piece implements AbstractPiece {
     return moves;
   }
 
-  List<int> possibleMoves(Arrangement arrangement) {
+  List<int> possibleMoves(int position, Arrangement arrangement) {
     List<int> moves = [];
     if (isBlack) {
       int target = leftDownMove(position);
@@ -112,7 +111,7 @@ class Piece implements AbstractPiece {
     if (isBlack) {
       target = leftDownMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.pieces[target];
+      Piece neighbour = arrangement.getPieceAt(target);
       if (neighbour == null) return false;
       if (neighbour.isBlack) {
         return false;
@@ -124,7 +123,7 @@ class Piece implements AbstractPiece {
     } else {
       target = leftUpMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.pieces[target];
+      Piece neighbour = arrangement.getPieceAt(target);
       if (neighbour == null) return false;
       if (neighbour.isWhite) {
         return false;
@@ -141,7 +140,7 @@ class Piece implements AbstractPiece {
     if (isBlack) {
       target = rightDownMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.pieces[target];
+      Piece neighbour = arrangement.getPieceAt(target);
       if (neighbour == null) return false;
       if (neighbour.isBlack) {
         return false;
@@ -153,7 +152,7 @@ class Piece implements AbstractPiece {
     } else {
       target = rightUpMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.pieces[target];
+      Piece neighbour = arrangement.getPieceAt(target);
       if (neighbour == null) return false;
       if (neighbour.isWhite) {
         return false;
@@ -165,23 +164,17 @@ class Piece implements AbstractPiece {
     }
   }
 
-  Dame promote(Arrangement arrangement) {
-    if (isDame) return this;
-    Dame dame = new Dame(pos: position, black: isBlack);
-    arrangement.pieces[dame.position] = dame;
-    return dame;
+  void promote(int position, Arrangement arrangement) {
+    if (isDame) return;
+    arrangement.pieces[position] = isBlack ? BLACK_DAME_CODE : WHITE_DAME_CODE;
   }
 
-  bool shouldPromote() {
+  bool shouldPromote(int position) {
     if (isDame) return false;
     if (isBlack) {
       return position > 55;
     } else {
       return position < 8;
     }
-  }
-
-  Piece copy() {
-    return new Piece(pos: position, black: isBlack);
   }
 }

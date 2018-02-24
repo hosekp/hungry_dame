@@ -12,3 +12,7 @@ const String BLACK_PIECE = "b";
 const String BLACK_DAME = "B";
 const String WHITE_PIECE = "w";
 const String WHITE_DAME = "W";
+const int BLACK_PIECE_CODE = 1;
+const int BLACK_DAME_CODE = 2;
+const int WHITE_PIECE_CODE = 3;
+const int WHITE_DAME_CODE = 4;

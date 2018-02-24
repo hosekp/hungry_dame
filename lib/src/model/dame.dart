@@ -2,11 +2,11 @@ part of model;
 
 class Dame extends Piece implements AbstractPiece {
   bool isDame = true;
-  Dame({int pos, bool black: false}) : super(black: black, pos: pos);
+  Dame({bool black: false}) : super(black: black, code: black ? BLACK_DAME_CODE : WHITE_DAME_CODE);
 
   String get letter => isBlack ? BLACK_DAME : WHITE_DAME;
 
-  bool isForced(Arrangement arrangement) {
+  bool isForced(int position, Arrangement arrangement) {
     if (canStepJump(position, LEFT_UP, arrangement)) return true;
     if (canStepJump(position, LEFT_DOWN, arrangement)) return true;
     if (canStepJump(position, RIGHT_UP, arrangement)) return true;
@@ -20,7 +20,7 @@ class Dame extends Piece implements AbstractPiece {
       target = Piece.stepMove(target, step);
       if (target == null) return false;
       if (arrangement.pieces.containsKey(target)) {
-        Piece neighbour = arrangement.pieces[target];
+        Piece neighbour = arrangement.getPieceAt(target);
         if (neighbour.isBlack == isBlack) return false;
         target = Piece.stepMove(target, step);
         if (target == null) return false;
@@ -29,7 +29,7 @@ class Dame extends Piece implements AbstractPiece {
     }
   }
 
-  List<int> possibleForcedMoves(Arrangement arrangement) {
+  List<int> possibleForcedMoves(int position, Arrangement arrangement) {
     List<int> moves = [];
     if (canStepJump(position, LEFT_UP, arrangement)) {
       _possibleStepJumps(position, LEFT_UP, arrangement, moves);
@@ -46,7 +46,7 @@ class Dame extends Piece implements AbstractPiece {
     return moves;
   }
 
-  List<int> possibleMoves(Arrangement arrangement) {
+  List<int> possibleMoves(int position, Arrangement arrangement) {
     List<int> moves = [];
     _possibleStepMoves(position, LEFT_UP, arrangement, moves);
     _possibleStepMoves(position, LEFT_DOWN, arrangement, moves);
@@ -78,9 +78,5 @@ class Dame extends Piece implements AbstractPiece {
       if (arrangement.pieces.containsKey(target)) return;
       moves.add(target);
     }
-  }
-
-  Piece copy() {
-    return new Dame(pos: position, black: isBlack);
   }
 }

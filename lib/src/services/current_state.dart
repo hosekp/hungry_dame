@@ -11,6 +11,7 @@ class CurrentState extends State {
   final Notificator possiblesChanged = new Notificator();
   final Notificator gameEndedChanged = new Notificator();
   Piece activePiece;
+  int activePiecePosition;
   List<int> possibleFields;
 
   CurrentState() {
@@ -20,26 +21,28 @@ class CurrentState extends State {
     isForced = false;
     chainedPiece = null;
     blackIsPlaying = false;
-    arrangement = new Arrangement.start();
+//    arrangement = new Arrangement.start();
 //    arrangement = new Arrangement.testChained();
 //    arrangement = new Arrangement.testDame();
 //    arrangement = new Arrangement.testEnd();
 //    arrangement = new Arrangement.testPromote();
-//    arrangement = new Arrangement.testPredict();
+    arrangement = new Arrangement.testPredict();
     findPlayablePieces();
-    setActivePiece(null);
+    setActivePiece(null, null);
     nextRoundChanged.notify();
 //    possiblesChanged.announce("possibleChanged","");
   }
 
-  void setActivePiece(Piece activePiece) {
-    if (playablePieces.contains(activePiece)) {
+  void setActivePiece(Piece activePiece, int position) {
+    if (playablePieces.contains(position)) {
       this.activePiece = activePiece;
+      this.activePiecePosition = position;
       findPossibles();
       activePieceChanged.notify();
       return;
     }
     this.activePiece = null;
+    this.activePiecePosition = null;
     findPossibles();
     activePieceChanged.notify();
   }
@@ -50,7 +53,7 @@ class CurrentState extends State {
       possiblesChanged.notify();
       return;
     }
-    possibleFields = findPossiblesForPiece(activePiece);
+    possibleFields = findPossiblesForPiece(activePiecePosition);
     possiblesChanged.notify();
   }
 
@@ -63,29 +66,28 @@ class CurrentState extends State {
     }
     blackIsPlaying = !blackIsPlaying;
     findPlayablePieces();
-    setActivePiece(null);
+    setActivePiece(null, null);
     nextRoundChanged.notify();
   }
 
-  void chainedMove(Piece piece) {
-    chainedPiece = piece;
+  void chainedMove(int position, Piece piece) {
+    chainedPiece = position;
     findPlayablePieces();
-    setActivePiece(piece);
+    setActivePiece(piece, position);
     nextRoundChanged.notify();
   }
 
-  void move(Piece piece, int position) {
+  void move(Piece piece, int from, int to) {
     if (isForced) {
-      removePieceInLine(piece.position, position, arrangement);
+      removePieceInLine(from, to, arrangement);
     }
-    arrangement.pieces[position] = piece;
-    arrangement.pieces.remove(piece.position);
-    piece.position = position;
-    if (piece.shouldPromote()) {
-      piece = piece.promote(arrangement);
+    arrangement.pieces[to] = piece.code;
+    arrangement.pieces.remove(from);
+    if (piece.shouldPromote(to)) {
+      piece.promote(to, arrangement);
     }
-    if (isForced && piece.isForced(arrangement)) {
-      chainedMove(piece);
+    if (isForced && piece.isForced(to, arrangement)) {
+      chainedMove(to, piece);
     } else {
       nextPlayer();
     }

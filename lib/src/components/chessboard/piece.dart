@@ -19,6 +19,8 @@ part of chessboard;
 class PieceComponent {
   @Input()
   Piece piece;
+  @Input()
+  int position;
   final ChangeDetectorRef changeDetector;
   final CurrentState currentState;
 
@@ -28,11 +30,11 @@ class PieceComponent {
       changeDetector.detectChanges();
     });
   }
-  bool get isActive => currentState.activePiece == piece;
+  bool get isActive => currentState.activePiecePosition == position;
   bool get isDame => piece?.isDame == true;
-  bool get isPlayable => currentState.playablePieces.contains(piece);
+  bool get isPlayable => currentState.playablePieces.contains(position);
 
   void onClick() {
-    currentState.setActivePiece(piece);
+    currentState.setActivePiece(piece, position);
   }
 }

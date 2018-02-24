@@ -1,7 +1,13 @@
 part of model;
 
 class Arrangement {
-  final Map<int, Piece> pieces;
+  final Map<int, int> pieces;
+  final Map<int, Piece> species = {
+    WHITE_PIECE_CODE: new Piece(black: false),
+    BLACK_PIECE_CODE: new Piece(black: true),
+    WHITE_DAME_CODE: new Dame(black: false),
+    BLACK_DAME_CODE: new Dame(black: true)
+  };
 
   Arrangement.start() : pieces = _initialPieces(_whiteInitial(), _blackInitial()) {}
 
@@ -23,47 +29,42 @@ class Arrangement {
     return _blackInitial().map((i) => 63 - i);
   }
 
-  static Map<int, Piece> _initialPieces(Iterable<int> whites, Iterable<int> blacks, [Iterable<int> dames]) {
-    Map<int, Piece> initialPieces = {};
+  Piece getPieceAt(int position) => species[pieces[position]];
+
+  static Map<int, int> _initialPieces(Iterable<int> whites, Iterable<int> blacks, [Iterable<int> dames]) {
+    Map<int, int> initialPieces = {};
     for (int pos in whites) {
-      initialPieces[pos] = new Piece(pos: pos);
+      initialPieces[pos] = WHITE_PIECE_CODE;
     }
     for (int pos in blacks) {
-      initialPieces[pos] = new Piece(pos: pos, black: true);
+      initialPieces[pos] = BLACK_PIECE_CODE;
     }
     if (dames != null) {
       for (int pos in dames) {
-        Piece oldPiece = initialPieces[pos];
-        initialPieces[pos] = new Dame(pos: pos, black: oldPiece.isBlack);
+        initialPieces[pos] = initialPieces[pos] == WHITE_PIECE_CODE ? WHITE_DAME_CODE : BLACK_DAME_CODE;
       }
     }
     return initialPieces;
   }
 
-  static _copyPieces(Map<int, Piece> oldPieces) {
-    Map<int, Piece> newPieces = {};
-    oldPieces.forEach((int pos, Piece piece) {
-      newPieces[pos] = piece.copy();
-    });
-    return newPieces;
-  }
+  static _copyPieces(Map<int, int> oldPieces) => new Map<int, int>.from(oldPieces);
 
   static _fromId(String id) {
-    Map<int, Piece> pieces = {};
+    Map<int, int> pieces = {};
     int pos = 0;
     id.runes.forEach((int rune) {
       switch (rune) {
         case 66:
-          pieces[pos] = new Dame(pos: pos, black: true);
+          pieces[pos] = BLACK_DAME_CODE;
           break;
         case 87:
-          pieces[pos] = new Dame(pos: pos, black: false);
+          pieces[pos] = WHITE_DAME_CODE;
           break;
         case 98:
-          pieces[pos] = new Piece(pos: pos, black: true);
+          pieces[pos] = BLACK_PIECE_CODE;
           break;
         case 119:
-          pieces[pos] = new Piece(pos: pos, black: false);
+          pieces[pos] = WHITE_PIECE_CODE;
           break;
         default:
           break;
@@ -73,14 +74,14 @@ class Arrangement {
     return pieces;
   }
 
-  void remove(Piece piece) {
-    pieces.remove(piece.position);
-  }
+//  void remove(Piece piece) {
+//    pieces.remove(piece.position);
+//  }
 
   String get id {
     StringBuffer result = new StringBuffer();
     for (int i = 0; i < 64; i++) {
-      Piece piece = pieces[i];
+      Piece piece = getPieceAt(i);
       result.write(piece == null ? "-" : piece.letter);
     }
     return result.toString();

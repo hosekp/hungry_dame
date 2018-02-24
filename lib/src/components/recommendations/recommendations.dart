@@ -24,9 +24,7 @@ part 'prediction.dart';
       </div>
     </template>
   """,
-    host: const {
-      "*ngIf": "isVisible"
-    },
+    host: const {"*ngIf": "isVisible"},
     styles: const [
       """
     .step_counter{
@@ -85,8 +83,9 @@ class RecommendationsComponent {
   void stopPredict() {
     predictor.stop();
   }
-  void onSwitch(){
-    isVisible=!isVisible;
+
+  void onSwitch() {
+    isVisible = !isVisible;
     changeDetector.detectChanges();
   }
 }
