@@ -35,11 +35,11 @@ class Predictor {
   }
 
   void reset([PredictedState chosenDummy]) {
-//    currentDepth=0;
     currentStep = 0;
     PredictedState chosenState;
     if (chosenDummy != null) {
-      chosenState = predictions.firstWhere((PredictedState state) => state.lastMoveTarget == chosenDummy.lastMoveTarget,
+    String chosenId = chosenDummy.arrangement.id;
+      chosenState = predictions.firstWhere((PredictedState state) => state.arrangement.id == chosenId,
           orElse: () => null);
     }
     if (chosenState != null) {
@@ -67,7 +67,6 @@ class Predictor {
   void predict(PredictedState currentState) {
     reset(currentState);
 
-    print("predict(${currentState.id}) stateQueue:${stateQueue.length} orphans:${orphans.length}");
     currentState.findPlayablePieces();
     predictions = prepareMoves(currentState);
     if (predictions.length == 0) {
@@ -127,22 +126,17 @@ class Predictor {
 
   double computeTreeCost(List<PredictedState> stateGroup, int depth) {
     double bestScore;
-    if (stateGroup.length == 1) {
-      PredictedState orphan = stateGroup.first;
-      if (orphan.path.length == depth) {
-//        print(
-//            "${new List.generate(depth-1, (_)=>".").join()}┌─ ${orphan.path.sublist(0,depth).join("|")} score: ${orphan.computeScore().toStringAsFixed(2)}");
-        return orphan.computeScore();
-      }
-    }
     Map<String, List<PredictedState>> subGroups = {};
-    stateGroup.forEach((PredictedState state) {
+    for(PredictedState state in stateGroup){
+      if(state.path.length==depth){
+        return state.computeScore();
+      }
       String pathPart = state.path[depth];
       if (!subGroups.containsKey(pathPart)) {
         subGroups[pathPart] = [];
       }
       subGroups[pathPart].add(state);
-    });
+    }
     subGroups.forEach((String pathPart, List<PredictedState> states) {
       double subGroupScore = computeTreeCost(states, depth + 1);
       if (bestScore == null) {
@@ -175,6 +169,8 @@ class Predictor {
   void pause() {
     _paused = true;
     sendResults();
+    stateQueue.clear();
+    orphans.clear();
   }
 
   void sendResults() {
@@ -186,7 +182,7 @@ class Predictor {
       String firstPath = state.path.first;
       List<PredictedState> group =
           allStates.where((PredictedState subState) => subState.path.first == firstPath).toList(growable: false);
-      double score = computeTreeCost(group, 0);
+      double score = computeTreeCost(group, 1);
       messages.add(MessageBus.toMessage(state, score));
     }
     currentDepth = computeDepth();

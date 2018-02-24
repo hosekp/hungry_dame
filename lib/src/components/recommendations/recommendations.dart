@@ -24,7 +24,6 @@ part 'prediction.dart';
       </div>
     </template>
   """,
-    host: const {"*ngIf": "isVisible"},
     styles: const [
       """
     .step_counter{

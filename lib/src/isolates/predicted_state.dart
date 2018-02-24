@@ -43,13 +43,14 @@ class PredictedState extends State {
     if (isChained) {
       chainedPiece = arrangement.pieces[target];
     }
-    if (origin != null) {
+    if (target != null) {
       lastMovedPiece = arrangement.getPieceAt(target);
       lastMoveTarget = target;
       lastMoveOrigin = origin;
     }
   }
   String get pathStep => "${lastMovedPiece.letter}${lastMoveOrigin}-$lastMoveTarget";
+  String get id => "${super.id}|${path}";
 
   double computeScore() {
     double whiteScore = 0.0;
@@ -78,14 +79,5 @@ class PredictedState extends State {
       if (whiteScore == 0) return -1000000.0;
       return whiteScore - blackScore;
     }
-//    if (whiteScore > blackScore) {
-//      if (blackScore == 0) return 1000000.0;
-//      return whiteScore / (blackScore + 0.00001);
-//    } else if (blackScore > whiteScore) {
-//      if (whiteScore == 0) return -1000000.0;
-//      return -blackScore / (whiteScore + 0.00001);
-//    } else {
-//      return 0.0;
-//    }
   }
 }

@@ -22,7 +22,7 @@ class PredictorGateway {
     onExit.listen((_) {
       print("Isolate died: $_");
     });
-    Uri uri = Uri.parse("/predictor.dart");
+    Uri uri = Uri.parse("./predictor.dart");
     isolateLib.Isolate
         .spawnUri(uri, [], portFromIsolate.sendPort, checked: true, errorsAreFatal: true, onError: onExit.sendPort)
         .then((isolateLib.Isolate freshIsolate) {
