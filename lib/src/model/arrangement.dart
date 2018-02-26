@@ -1,7 +1,9 @@
+import 'dart:typed_data';
 import 'package:hungry_dame/src/model/model.dart';
 import 'package:hungry_dame/src/services/constants.dart';
 
 const Map<int, Piece> SPECIES = const{
+  0:null,
   WHITE_PIECE_CODE: const Piece(black: false),
   BLACK_PIECE_CODE: const Piece(black: true),
   WHITE_DAME_CODE: const Dame(black: false),
@@ -10,28 +12,28 @@ const Map<int, Piece> SPECIES = const{
 
 class Arrangement {
 
-  static Map<int, int> start() => _initialPieces(_whiteInitial(), _blackInitial());
+  static Int8List start() => _initialPieces(_whiteInitial(), _blackInitial());
 
   static List<int> _blackInitial() {
     return const [1, 3, 5, 7, 8, 10, 12, 14, 17, 19, 21, 23];
   }
 
-  static Map<int, int> testChained() => _initialPieces([12, 28], [19, 1, 5]);
-  static Map<int, int> testDame() => _initialPieces([35, 44], [26, 21, 14], [35]);
-  static Map<int, int> testEnd() => _initialPieces([35], [26, 10], [35]);
-  static Map<int, int> testPromote() => _initialPieces([17], [12, 10]);
+  static Int8List testChained() => _initialPieces([12, 28], [19, 1, 5]);
+  static Int8List testDame() => _initialPieces([35, 44], [26, 21, 14], [35]);
+  static Int8List testEnd() => _initialPieces([35], [26, 10], [35]);
+  static Int8List testPromote() => _initialPieces([17], [12, 10]);
 //  Arrangement.testPredict():pieces = _initialPieces([35,44,62],[19,12,1]);
-  static Map<int, int> testPredict() => _initialPieces([62], [51]);
+  static Int8List testPredict() => _initialPieces([62], [51]);
 
-  static Map<int, int> copy(Map<int, int> source) => _copyPieces(source);
-  static Map<int, int> fromId(String id) => _fromId(id);
+  static Int8List copy(Int8List source) => _copyPieces(source);
+  static Int8List fromId(String id) => _fromId(id);
 
   static Iterable<int> _whiteInitial() {
     return _blackInitial().map((i) => 63 - i);
   }
 
-  static Map<int, int> _initialPieces(Iterable<int> whites, Iterable<int> blacks, [Iterable<int> dames]) {
-    Map<int, int> initialPieces = {};
+  static Int8List _initialPieces(Iterable<int> whites, Iterable<int> blacks, [Iterable<int> dames]) {
+    Int8List initialPieces = new Int8List(64);
     for (int pos in whites) {
       initialPieces[pos] = WHITE_PIECE_CODE;
     }
@@ -46,10 +48,10 @@ class Arrangement {
     return initialPieces;
   }
 
-  static _copyPieces(Map<int, int> oldPieces) => new Map<int, int>.from(oldPieces);
+  static _copyPieces(Int8List oldPieces) => new Int8List.fromList(oldPieces);
 
   static _fromId(String id) {
-    Map<int, int> pieces = {};
+    Int8List pieces = new Int8List(64);
     int pos = 0;
     id.runes.forEach((int rune) {
       switch (rune) {

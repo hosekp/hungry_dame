@@ -1,9 +1,10 @@
+import 'dart:typed_data';
 import 'package:hungry_dame/src/model/arrangement.dart';
 import 'package:hungry_dame/src/model/model.dart';
 import 'package:hungry_dame/src/services/constants.dart';
 
 class State {
-  Map<int, int> pieces;
+  Int8List pieces8;
   int chainedPiece;
   bool blackIsPlaying = false;
   bool isForced;
@@ -16,44 +17,73 @@ class State {
       return [chainedPiece];
     }
     List<int> playingDames = [];
+    int position=0;
+    Iterator<int> iterator=pieces8.iterator;
     if (blackIsPlaying) {
-      pieces.forEach((int position, int pieceCode) {
-        if (pieceCode == BLACK_DAME_CODE) {
+      while(iterator.moveNext()){
+        if (iterator.current == BLACK_DAME_CODE) {
           playingDames.add(position);
         }
-      });
+        position++;
+      }
+//      pieces.forEach((int position, int pieceCode) {
+//        if (pieceCode == BLACK_DAME_CODE) {
+//          playingDames.add(position);
+//        }
+//      });
     } else {
-      pieces.forEach((int position, int pieceCode) {
-        if (pieceCode == WHITE_DAME_CODE) {
+      while(iterator.moveNext()){
+        if (iterator.current == WHITE_DAME_CODE) {
           playingDames.add(position);
         }
-      });
+        position++;
+      }
+//      pieces.forEach((int position, int pieceCode) {
+//        if (pieceCode == WHITE_DAME_CODE) {
+//          playingDames.add(position);
+//        }
+//      });
     }
     List<int> playablePieces = [];
     for (int position in playingDames) {
       Dame dame = getPieceAt(position);
-      if (dame.isForced(position, pieces)) {
+      if (dame.isForced(position, pieces8)) {
         playablePieces.add(position);
       }
     }
     if (playablePieces.length > 0) return playablePieces;
+
     List<int> playingPieces = [];
+    position=0;
+    iterator=pieces8.iterator;
     if (blackIsPlaying) {
-      pieces.forEach((int position, int pieceCode) {
-        if (pieceCode == BLACK_PIECE_CODE) {
+      while(iterator.moveNext()){
+        if (iterator.current == BLACK_PIECE_CODE) {
           playingPieces.add(position);
         }
-      });
+        position++;
+      }
+//      pieces.forEach((int position, int pieceCode) {
+//        if (pieceCode == BLACK_PIECE_CODE) {
+//          playingPieces.add(position);
+//        }
+//      });
     } else {
-      pieces.forEach((int position, int pieceCode) {
-        if (pieceCode == WHITE_PIECE_CODE) {
+      while(iterator.moveNext()){
+        if (iterator.current == WHITE_PIECE_CODE) {
           playingPieces.add(position);
         }
-      });
+        position++;
+      }
+//      pieces.forEach((int position, int pieceCode) {
+//        if (pieceCode == WHITE_PIECE_CODE) {
+//          playingPieces.add(position);
+//        }
+//      });
     }
     for (int position in playingPieces) {
       Piece piece = getPieceAt(position);
-      if (piece.isForced(position, pieces)) {
+      if (piece.isForced(position, pieces8)) {
         playablePieces.add(position);
       }
     }
@@ -66,9 +96,9 @@ class State {
   List<int> findPossiblesForPiece(int position) {
     Piece piece = getPieceAt(position);
     if (isForced) {
-      return piece.possibleForcedMoves(position, pieces);
+      return piece.possibleForcedMoves(position, pieces8);
     } else {
-      return piece.possibleMoves(position, pieces);
+      return piece.possibleMoves(position, pieces8);
     }
   }
 
@@ -83,10 +113,10 @@ class State {
     int mover = from;
     while (mover != to) {
       mover += step;
-      pieces.remove(mover);
+      pieces8[mover]=0;
     }
   }
-  Piece getPieceAt(int position) => SPECIES[pieces[position]];
+  Piece getPieceAt(int position) => SPECIES[pieces8[position]];
 
   String get id {
     StringBuffer result = new StringBuffer();
@@ -111,11 +141,11 @@ class State {
 
   bool isEndOfGame() {
     if (blackIsPlaying) {
-      return !pieces.values.any((int pieceType) {
+      return !pieces8.any((int pieceType) {
         return pieceType == WHITE_DAME_CODE || pieceType == WHITE_PIECE_CODE;
       });
     } else {
-      return !pieces.values.any((int pieceType) {
+      return !pieces8.any((int pieceType) {
         return pieceType == BLACK_DAME_CODE || pieceType == BLACK_PIECE_CODE;
       });
     }

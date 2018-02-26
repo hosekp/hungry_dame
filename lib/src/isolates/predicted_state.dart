@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:hungry_dame/src/model/arrangement.dart';
 import 'package:hungry_dame/src/model/model.dart';
 import 'package:hungry_dame/src/model/state.dart';
@@ -13,19 +14,19 @@ class PredictedState extends State {
     lastMoveTarget = target;
     lastMovedPiece = piece;
     lastMoveOrigin = origin;
-    pieces = Arrangement.copy(previous.pieces);
+    pieces8 = Arrangement.copy(previous.pieces8);
     isForced = previous.isForced;
     blackIsPlaying = previous.blackIsPlaying;
 
     if (isForced) {
       removePieceInLine(origin, target);
     }
-    pieces[target] = piece.code;
-    pieces.remove(origin);
+    pieces8[target] = piece.code;
+    pieces8[origin] = 0;
     if (piece.shouldPromote(target)) {
-      piece.promote(target, pieces);
+      piece.promote(target, pieces8);
     }
-    if (isForced && piece.isForced(target, pieces)) {
+    if (isForced && piece.isForced(target, pieces8)) {
       chainedPiece = target;
     } else {
       isForced = false;
@@ -38,8 +39,8 @@ class PredictedState extends State {
     path.add(pathStep);
   }
 
-  PredictedState.allData(Map<int,int> pieces, bool black, bool isChained, int origin, int target) {
-    this.pieces = pieces;
+  PredictedState.allData(Int8List pieces, bool black, bool isChained, int origin, int target) {
+    this.pieces8 = pieces;
     blackIsPlaying = black;
     if (isChained) {
       chainedPiece = pieces[target];
@@ -56,8 +57,11 @@ class PredictedState extends State {
   double computeScore() {
     double whiteScore = 0.0;
     double blackScore = 0.0;
-    for (int piecePos in pieces.keys) {
-      double pieceCode = pieces[piecePos].toDouble();
+    int piecePos=0;
+    Iterator<int> iterator=pieces8.iterator;
+    while(iterator.moveNext()){
+      int pieceCode = iterator.current;
+      if(pieceCode==0) continue;
       if (pieceCode > 0) {
         if (pieceCode == WHITE_PIECE_CODE) {
           int row = (piecePos / 8).floor();
@@ -73,6 +77,7 @@ class PredictedState extends State {
           blackScore += DAME_VALUE;
         }
       }
+      piecePos++;
 //      double pieceValue;
 //      if (pieceCode == BLACK_DAME_CODE || pieceCode == WHITE_DAME_CODE) {
 //        pieceValue = DAME_VALUE;

@@ -1,6 +1,6 @@
 const int MAX_DEPTH = 12;
-//const int MAX_STEPS = 1500000;
-const int MAX_STEPS = 200;
+const int MAX_STEPS = 4000000;
+//const int MAX_STEPS = 200;
 const HUNGRY_DAME = true;
 const int DAME_VALUE = 3;
 const int PIECE_VALUE = 1;

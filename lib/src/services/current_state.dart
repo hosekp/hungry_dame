@@ -22,8 +22,8 @@ class CurrentState extends State {
     isForced = false;
     chainedPiece = null;
     blackIsPlaying = false;
-    pieces = Arrangement.start();
-//    pieces = Arrangement.testChained();
+    pieces8 = Arrangement.start();
+//    pieces8 = Arrangement.testChained();
 //    pieces = Arrangement.testDame();
 //    pieces = Arrangement.testEnd();
 //    pieces = Arrangement.testPromote();
@@ -82,12 +82,12 @@ class CurrentState extends State {
     if (isForced) {
       removePieceInLine(from, to);
     }
-    pieces[to] = piece.code;
-    pieces.remove(from);
+    pieces8[to] = piece.code;
+    pieces8[from]=0;
     if (piece.shouldPromote(to)) {
-      piece.promote(to, pieces);
+      piece.promote(to, pieces8);
     }
-    if (isForced && piece.isForced(to, pieces)) {
+    if (isForced && piece.isForced(to, pieces8)) {
       chainedMove(to, piece);
     } else {
       nextPlayer();

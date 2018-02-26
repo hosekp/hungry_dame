@@ -1,5 +1,6 @@
 library model;
 
+import 'dart:typed_data';
 import 'package:hungry_dame/src/model/arrangement.dart';
 import 'package:hungry_dame/src/services/constants.dart';
 
