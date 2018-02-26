@@ -5,15 +5,13 @@ import 'dart:isolate';
 import 'package:hungry_dame/src/isolates/message_bus.dart';
 import 'package:hungry_dame/src/isolates/predicted_state.dart';
 import 'package:hungry_dame/src/services/constants.dart';
-import 'package:hungry_dame/src/services/state.dart';
 
 class Predictor {
   SendPort portToMain;
   ReceivePort portFromMain = new ReceivePort();
   List<PredictedState> predictions = [];
   List<PredictedState> orphans = [];
-  ListQueue<PredictedState> stateQueue = new ListQueue<PredictedState>();
-  double currentDepth;
+  Queue<PredictedState> stateQueue = new Queue<PredictedState>();
   int currentStep = 0;
   DateTime lastUpdateTime;
   bool _paused = false;
@@ -29,6 +27,11 @@ class Predictor {
           pause();
           return;
         }
+        if (rawMessage.containsKey("sendResult")) {
+          if(_paused) return;
+          sendResults();
+          return;
+        }
       }
       predict(MessageBus.fromInitMessage(rawMessage));
     });
@@ -38,9 +41,9 @@ class Predictor {
     currentStep = 0;
     PredictedState chosenState;
     if (chosenDummy != null) {
-    String chosenId = chosenDummy.arrangement.id;
-      chosenState = predictions.firstWhere((PredictedState state) => state.arrangement.id == chosenId,
-          orElse: () => null);
+      String chosenId = chosenDummy.arrangementId;
+      chosenState =
+          predictions.firstWhere((PredictedState state) => state.arrangementId == chosenId, orElse: () => null);
     }
     if (chosenState != null) {
       predictions = [];
@@ -60,7 +63,6 @@ class Predictor {
       orphans = [];
       stateQueue.clear();
     }
-    currentDepth = 0.0;
     _paused = false;
   }
 
@@ -93,11 +95,18 @@ class Predictor {
       if (states.length == 0) {
         orphans.add(state);
       } else {
-        stateQueue.addAll(states);
+        if(state.isForced){
+          states.forEach(stateQueue.addFirst);
+        }else{
+          stateQueue.addAll(states);
+        }
       }
     }
     if (new DateTime.now().difference(lastUpdateTime) > UPDATE_PERIOD) {
-      sendResults();
+      if(stateQueue.length+orphans.length >=MAX_STEPS){
+        return pause();
+      }
+      sendProgress();
       lastUpdateTime = new DateTime.now();
     }
 
@@ -105,35 +114,36 @@ class Predictor {
   }
 
   List<PredictedState> predictForStateOneLevel(PredictedState state) {
-    state.findPlayablePieces();
     List<PredictedState> predictions = prepareMoves(state);
     return predictions;
   }
 
-  List<PredictedState> prepareMoves(State source) {
+  List<PredictedState> prepareMoves(PredictedState source) {
     List<PredictedState> predictions = [];
-    for (var piecePosition in source.playablePieces) {
+    List<int> playablePieces = source.findPlayablePieces();
+    for (var piecePosition in playablePieces) {
       List<int> possibles = source.findPossiblesForPiece(piecePosition);
       if (possibles.length == 0) continue;
       for (int target in possibles) {
         PredictedState predictedState =
-            new PredictedState.move(source, source.arrangement.getPieceAt(piecePosition), piecePosition, target);
+            new PredictedState.move(source, source.getPieceAt(piecePosition), piecePosition, target);
         predictions.add(predictedState);
       }
     }
     return predictions;
   }
 
-  double computeTreeCost(List<PredictedState> stateGroup, int depth) {
+  double computeTreeCost(Iterable<PredictedState> stateGroup, int depth) {
     double bestScore;
     Map<String, List<PredictedState>> subGroups = {};
-    for(PredictedState state in stateGroup){
-      if(state.path.length==depth){
+    for (PredictedState state in stateGroup) {
+      if (state.path.length == depth) {
         return state.computeScore();
       }
       String pathPart = state.path[depth];
-      if (!subGroups.containsKey(pathPart)) {
-        subGroups[pathPart] = [];
+      if (subGroups[pathPart] == null) {
+        subGroups[pathPart] = [state];
+        continue;
       }
       subGroups[pathPart].add(state);
     }
@@ -156,8 +166,10 @@ class Predictor {
         }
       }
     });
-    if (bestScore.abs() >= 100000) {
-      bestScore -= 1 * bestScore.sign;
+    if (bestScore >= 100000) {
+      return bestScore - 1;
+    } else if (bestScore <= -100000) {
+      return bestScore + 1;
     }
 //    print(
 //        "${new List.generate(depth, (_)=>".").join()}└ ${stateGroup[0].path.sublist(0,depth).join("|")} score: ${bestScore.toStringAsFixed(2)}");
@@ -169,25 +181,29 @@ class Predictor {
   void pause() {
     _paused = true;
     sendResults();
-    stateQueue.clear();
-    orphans.clear();
+//    stateQueue.clear();
+//    orphans.clear();
   }
 
   void sendResults() {
-    print("sendResults");
+//    print("sendResults");
     Iterable<PredictedState> allStates =
         [orphans, stateQueue].expand((f) => f).where((PredictedState state) => state != null);
     List<Map<String, dynamic>> messages = [];
     for (PredictedState state in predictions) {
       String firstPath = state.path.first;
-      List<PredictedState> group =
-          allStates.where((PredictedState subState) => subState.path.first == firstPath).toList(growable: false);
+      Iterable<PredictedState> group =
+          allStates.where((PredictedState subState) => subState.path[0] == firstPath);
       double score = computeTreeCost(group, 1);
       messages.add(MessageBus.toMessage(state, score));
     }
-    currentDepth = computeDepth();
+    double currentDepth = computeDepth();
     messages.add({"steps": stateQueue.length + orphans.length, "depth": currentDepth});
     portToMain.send(messages);
+  }
+  void sendProgress(){
+    double currentDepth = computeDepth();
+    portToMain.send({"steps": stateQueue.length + orphans.length, "depth": currentDepth});
   }
 
   double computeDepth() {

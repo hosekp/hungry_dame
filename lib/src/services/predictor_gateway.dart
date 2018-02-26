@@ -37,6 +37,8 @@ class PredictorGateway {
       });
       return;
     }
+    predictions.clear();
+    onPrediction.notify();
     portToIsolate.send(MessageBus.toInitMessage(currentState));
   }
 
@@ -44,25 +46,35 @@ class PredictorGateway {
     portToIsolate.send({"stop": true});
   }
 
+  void orderResult() {
+    portToIsolate.send({"sendResult": true});
+  }
+
   void onResponse(rawMessage) {
     if (rawMessage is isolateLib.SendPort) {
       portToIsolate = rawMessage;
-    }
-    if (rawMessage is String) {
+    } else if (rawMessage is String) {
       print(rawMessage);
-    }
-    if (rawMessage is! List) return;
-    predictions.clear();
-    List<Map<String, dynamic>> messages = rawMessage;
-    for (Map<String, dynamic> message in messages) {
+    } else if (rawMessage is Map) {
+      Map<String, dynamic> message = rawMessage;
       if (message["steps"] != null) {
         currentStep = message["steps"];
         currentDepth = message["depth"];
-      } else {
-        predictions.add(MessageBus.fromIsolateMessage(message));
       }
+      onPrediction.notify();
+    } else if (rawMessage is List) {
+      predictions.clear();
+      List<Map<String, dynamic>> messages = rawMessage;
+      for (Map<String, dynamic> message in messages) {
+        if (message["steps"] != null) {
+          currentStep = message["steps"];
+          currentDepth = message["depth"];
+        } else {
+          predictions.add(MessageBus.fromIsolateMessage(message));
+        }
+      }
+      onPrediction.notify();
     }
-    onPrediction.notify();
   }
 
   Future delay() => new Future.delayed(const Duration(milliseconds: 10));

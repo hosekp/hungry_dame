@@ -53,7 +53,7 @@ class ChessFieldComponent {
     return currentState.possibleFields.contains(index);
   }
 
-  Piece get piece => currentState.arrangement.getPieceAt(index);
+  Piece get piece => currentState.getPieceAt(index);
 
   void onClick() {
     if (!currentState.possibleFields.contains(index)) return;

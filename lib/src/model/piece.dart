@@ -6,30 +6,30 @@ class Piece implements AbstractPiece {
   final int code;
 //  int position;
 
-  Piece({bool black: false, int code: 0})
+  const Piece({bool black: false, int code: 0})
       : isBlack = black,
-        code = code == 0 ? (black ? BLACK_PIECE_CODE : WHITE_PIECE_CODE) : code {}
+        code = code == 0 ? (black ? BLACK_PIECE_CODE : WHITE_PIECE_CODE) : code;
 
   bool get isWhite => !isBlack;
 
   String get letter => isBlack ? BLACK_PIECE : WHITE_PIECE;
 
-  bool isForced(int position, Arrangement arrangement) {
-    if (canLeftJump(position, arrangement)) return true;
-    if (canRightJump(position, arrangement)) return true;
+  bool isForced(int position, Map<int, int> pieces) {
+    if (canLeftJump(position, pieces)) return true;
+    if (canRightJump(position, pieces)) return true;
     return false;
   }
 
-  List<int> possibleForcedMoves(int position, Arrangement arrangement) {
+  List<int> possibleForcedMoves(int position, Map<int, int> pieces) {
     List<int> moves = [];
-    if (canLeftJump(position, arrangement)) {
+    if (canLeftJump(position, pieces)) {
       if (isBlack) {
         moves.add(leftDownMove(leftDownMove(position)));
       } else {
         moves.add(leftUpMove(leftUpMove(position)));
       }
     }
-    if (canRightJump(position, arrangement)) {
+    if (canRightJump(position, pieces)) {
       if (isBlack) {
         moves.add(rightDownMove(rightDownMove(position)));
       } else {
@@ -39,31 +39,31 @@ class Piece implements AbstractPiece {
     return moves;
   }
 
-  List<int> possibleMoves(int position, Arrangement arrangement) {
+  List<int> possibleMoves(int position, Map<int, int> pieces) {
     List<int> moves = [];
     if (isBlack) {
       int target = leftDownMove(position);
       if (target != null) {
-        if (!arrangement.pieces.containsKey(target)) {
+        if (!pieces.containsKey(target)) {
           moves.add(target);
         }
       }
       target = rightDownMove(position);
       if (target != null) {
-        if (!arrangement.pieces.containsKey(target)) {
+        if (!pieces.containsKey(target)) {
           moves.add(target);
         }
       }
     } else {
       int target = leftUpMove(position);
       if (target != null) {
-        if (!arrangement.pieces.containsKey(target)) {
+        if (!pieces.containsKey(target)) {
           moves.add(target);
         }
       }
       target = rightUpMove(position);
       if (target != null) {
-        if (!arrangement.pieces.containsKey(target)) {
+        if (!pieces.containsKey(target)) {
           moves.add(target);
         }
       }
@@ -105,68 +105,69 @@ class Piece implements AbstractPiece {
     if ((originRow - targetRow).abs() != 1) return null;
     return target;
   }
+//  Piece getPieceAt(int position) => SPECIES[pieces[position]];
 
-  bool canLeftJump(int origin, Arrangement arrangement) {
+  bool canLeftJump(int origin, Map<int, int> pieces) {
     int target;
     if (isBlack) {
       target = leftDownMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.getPieceAt(target);
+      Piece neighbour = SPECIES[pieces[target]];
       if (neighbour == null) return false;
       if (neighbour.isBlack) {
         return false;
       } else {
         target = leftDownMove(target);
         if (target == null) return false;
-        return !arrangement.pieces.containsKey(target);
+        return !pieces.containsKey(target);
       }
     } else {
       target = leftUpMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.getPieceAt(target);
+      Piece neighbour = SPECIES[pieces[target]];
       if (neighbour == null) return false;
       if (neighbour.isWhite) {
         return false;
       } else {
         target = leftUpMove(target);
         if (target == null) return false;
-        return !arrangement.pieces.containsKey(target);
+        return !pieces.containsKey(target);
       }
     }
   }
 
-  bool canRightJump(int origin, Arrangement arrangement) {
+  bool canRightJump(int origin, Map<int, int> pieces) {
     int target;
     if (isBlack) {
       target = rightDownMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.getPieceAt(target);
+      Piece neighbour = SPECIES[pieces[target]];
       if (neighbour == null) return false;
       if (neighbour.isBlack) {
         return false;
       } else {
         target = rightDownMove(target);
         if (target == null) return false;
-        return !arrangement.pieces.containsKey(target);
+        return !pieces.containsKey(target);
       }
     } else {
       target = rightUpMove(origin);
       if (target == null) return false;
-      Piece neighbour = arrangement.getPieceAt(target);
+      Piece neighbour = SPECIES[pieces[target]];
       if (neighbour == null) return false;
       if (neighbour.isWhite) {
         return false;
       } else {
         target = rightUpMove(target);
         if (target == null) return false;
-        return !arrangement.pieces.containsKey(target);
+        return !pieces.containsKey(target);
       }
     }
   }
 
-  void promote(int position, Arrangement arrangement) {
+  void promote(int position, Map<int, int> pieces) {
     if (isDame) return;
-    arrangement.pieces[position] = isBlack ? BLACK_DAME_CODE : WHITE_DAME_CODE;
+    pieces[position] = isBlack ? BLACK_DAME_CODE : WHITE_DAME_CODE;
   }
 
   bool shouldPromote(int position) {

@@ -1,11 +1,11 @@
 import 'package:angular/di.dart';
+import 'package:hungry_dame/src/model/arrangement.dart';
 import 'package:hungry_dame/src/model/model.dart';
+import 'package:hungry_dame/src/model/state.dart';
 import 'package:hungry_dame/src/services/notificator.dart';
-import 'package:hungry_dame/src/services/state.dart';
 
 @Injectable()
 class CurrentState extends State {
-  Arrangement arrangement;
   final Notificator activePieceChanged = new Notificator();
   final Notificator nextRoundChanged = new Notificator();
   final Notificator possiblesChanged = new Notificator();
@@ -13,6 +13,7 @@ class CurrentState extends State {
   Piece activePiece;
   int activePiecePosition;
   List<int> possibleFields;
+  List<int> playablePieces = [];
 
   CurrentState() {
     reset();
@@ -21,13 +22,13 @@ class CurrentState extends State {
     isForced = false;
     chainedPiece = null;
     blackIsPlaying = false;
-//    arrangement = new Arrangement.start();
-//    arrangement = new Arrangement.testChained();
-//    arrangement = new Arrangement.testDame();
-//    arrangement = new Arrangement.testEnd();
-//    arrangement = new Arrangement.testPromote();
-    arrangement = new Arrangement.testPredict();
-    findPlayablePieces();
+    pieces = Arrangement.start();
+//    pieces = Arrangement.testChained();
+//    pieces = Arrangement.testDame();
+//    pieces = Arrangement.testEnd();
+//    pieces = Arrangement.testPromote();
+//    pieces = Arrangement.testPredict();
+    playablePieces=findPlayablePieces();
     setActivePiece(null, null);
     nextRoundChanged.notify();
 //    possiblesChanged.announce("possibleChanged","");
@@ -65,28 +66,28 @@ class CurrentState extends State {
       return;
     }
     blackIsPlaying = !blackIsPlaying;
-    findPlayablePieces();
+    playablePieces=findPlayablePieces();
     setActivePiece(null, null);
     nextRoundChanged.notify();
   }
 
   void chainedMove(int position, Piece piece) {
     chainedPiece = position;
-    findPlayablePieces();
+    playablePieces=findPlayablePieces();
     setActivePiece(piece, position);
     nextRoundChanged.notify();
   }
 
   void move(Piece piece, int from, int to) {
     if (isForced) {
-      removePieceInLine(from, to, arrangement);
+      removePieceInLine(from, to);
     }
-    arrangement.pieces[to] = piece.code;
-    arrangement.pieces.remove(from);
+    pieces[to] = piece.code;
+    pieces.remove(from);
     if (piece.shouldPromote(to)) {
-      piece.promote(to, arrangement);
+      piece.promote(to, pieces);
     }
-    if (isForced && piece.isForced(to, arrangement)) {
+    if (isForced && piece.isForced(to, pieces)) {
       chainedMove(to, piece);
     } else {
       nextPlayer();

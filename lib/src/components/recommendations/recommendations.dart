@@ -16,8 +16,8 @@ part 'prediction.dart';
     template: """
     <div class='recommendation_switch' (click)='onSwitch()'></div>
     <template [ngIf]='isVisible'>
-      <material-button raised (click)='predict()'>Predict</material-button>
-      <material-button raised (click)='stopPredict()'>Stop</material-button>
+      <material-button raised (click)='orderResults()'>Results</material-button>
+      <material-button raised (click)='stopPredict()'>Kill</material-button>
       <div class='step_counter'>Depth: {{predictor.currentDepth}} Step: {{predictor.currentStep}}</div>
       <div *ngFor='let prediction of recommendations'>
         {{lastPieceLabel(prediction)}} to {{prediction.lastMoveTarget}}: {{scoreLabel(prediction)}}
@@ -75,8 +75,8 @@ class RecommendationsComponent {
     return recommendations;
   }
 
-  void predict() {
-    predictor.predict(currentState);
+  void orderResults() {
+    predictor.orderResult();
   }
 
   void stopPredict() {
