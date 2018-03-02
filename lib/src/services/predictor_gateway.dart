@@ -18,6 +18,9 @@ class PredictorGateway {
   isolateLib.ReceivePort onExit = new isolateLib.ReceivePort();
 
   PredictorGateway() {
+    init();
+  }
+  void init(){
     portFromIsolate.listen(onResponse);
     onExit.listen((_) {
       print("Isolate died: $_");

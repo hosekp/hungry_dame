@@ -114,6 +114,7 @@ class Predictor {
   }
 
   List<PredictedState> predictForStateOneLevel(PredictedState state) {
+    if(state.path.length == MAX_DEPTH) return const [];
     List<PredictedState> predictions = prepareMoves(state);
     return predictions;
   }
@@ -193,7 +194,7 @@ class Predictor {
     for (PredictedState state in predictions) {
       String firstPath = state.path.first;
       Iterable<PredictedState> group =
-          allStates.where((PredictedState subState) => subState.path[0] == firstPath);
+          allStates.where((PredictedState subState) => subState.path.length>0 && subState.path[0] == firstPath);
       double score = computeTreeCost(group, 1);
       messages.add(MessageBus.toMessage(state, score));
     }
@@ -211,11 +212,11 @@ class Predictor {
     if (stateQueue.length == 0) return double.INFINITY;
     int summedDepth = 0;
     int length = stateQueue.length;
-    for (double i = 0.0; i < 1; i += 0.01) {
+    for (double i = 0.0; i < 1; i += 0.002) {
       summedDepth += stateQueue.elementAt((i * length).floor()).path.length;
     }
 //    int summedDepth = stateQueue.fold<int>(0, (int sum, PredictedState state) => sum + state.path.length);
-    return summedDepth / 100.0;
+    return summedDepth / 500.0;
   }
 
   void print(String message) {

@@ -17,10 +17,10 @@ class State {
       return [chainedPiece];
     }
     List<int> playingDames = [];
-    int position=0;
-    Iterator<int> iterator=pieces8.iterator;
+    int position = 0;
+    Iterator<int> iterator = pieces8.iterator;
     if (blackIsPlaying) {
-      while(iterator.moveNext()){
+      while (iterator.moveNext()) {
         if (iterator.current == BLACK_DAME_CODE) {
           playingDames.add(position);
         }
@@ -32,7 +32,7 @@ class State {
 //        }
 //      });
     } else {
-      while(iterator.moveNext()){
+      while (iterator.moveNext()) {
         if (iterator.current == WHITE_DAME_CODE) {
           playingDames.add(position);
         }
@@ -54,10 +54,10 @@ class State {
     if (playablePieces.length > 0) return playablePieces;
 
     List<int> playingPieces = [];
-    position=0;
-    iterator=pieces8.iterator;
+    position = 0;
+    iterator = pieces8.iterator;
     if (blackIsPlaying) {
-      while(iterator.moveNext()){
+      while (iterator.moveNext()) {
         if (iterator.current == BLACK_PIECE_CODE) {
           playingPieces.add(position);
         }
@@ -69,7 +69,7 @@ class State {
 //        }
 //      });
     } else {
-      while(iterator.moveNext()){
+      while (iterator.moveNext()) {
         if (iterator.current == WHITE_PIECE_CODE) {
           playingPieces.add(position);
         }
@@ -102,7 +102,7 @@ class State {
     }
   }
 
-  void removePieceInLine(int from, int to) {
+  void removePieceInLineOld(int from, int to) {
     int diff = to - from;
     int step;
     if (diff > 0) {
@@ -113,26 +113,45 @@ class State {
     int mover = from;
     while (mover != to) {
       mover += step;
-      pieces8[mover]=0;
+      pieces8[mover] = 0;
     }
   }
+
+  void removePieceInLine(int from, int to) {
+    int indexFrom = POSITION_TO_INDEX[from];
+    int indexTo = POSITION_TO_INDEX[to];
+    int diff = indexTo - indexFrom;
+    List<int> neighbours;
+    if (diff > 0) {
+      neighbours = diff % 7 == 0 ? LEFT_DOWN_NEIGHBOURS : RIGHT_DOWN_NEIGHBOURS;
+    } else {
+      neighbours = -diff % 9 == 0 ? LEFT_UP_NEIGHBOURS : RIGHT_UP_NEIGHBOURS;
+    }
+    int mover = from;
+    while (mover != to) {
+      mover = neighbours[mover];
+      pieces8[mover] = 0;
+    }
+  }
+
   Piece getPieceAt(int position) => SPECIES[pieces8[position]];
 
   String get id {
     StringBuffer result = new StringBuffer();
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 32; i++) {
       Piece piece = getPieceAt(i);
       result.write(piece == null ? "-" : piece.letter);
     }
-    result..write("|")..write(blackIsPlaying?BLACK_DAME:WHITE_DAME);
-    if(chainedPiece!=null){
+    result..write("|")..write(blackIsPlaying ? BLACK_DAME : WHITE_DAME);
+    if (chainedPiece != null) {
       result.write("|${chainedPiece}");
     }
     return result.toString();
   }
-  String get arrangementId{
+
+  String get arrangementId {
     StringBuffer result = new StringBuffer();
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 32; i++) {
       Piece piece = getPieceAt(i);
       result.write(piece == null ? "-" : piece.letter);
     }

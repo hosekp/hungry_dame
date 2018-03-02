@@ -4,8 +4,8 @@ part of chessboard;
     selector: "chessfield",
     directives: const [PieceComponent, NgIf],
     template: """
-    <div class='label-index'>{{index}}</div>
-    <piece [piece]='piece' [position]='index'></piece>
+    <div *ngIf='isBlackField' class='label-index'>{{position}}</div>
+    <piece [piece]='piece' [position]='position'></piece>
   """,
     host: const {
       '(click)': "onClick()",
@@ -35,11 +35,13 @@ part of chessboard;
     }
   """
     ])
-class ChessFieldComponent {
+class ChessFieldComponent implements OnInit{
   @Input()
   int index;
   final CurrentState currentState;
   final ChangeDetectorRef changeDetector;
+  bool isBlackField;
+  int position;
 
   ChessFieldComponent(this.currentState, this.changeDetector) {
     currentState.possiblesChanged.add(() {
@@ -47,16 +49,22 @@ class ChessFieldComponent {
     });
   }
 
-  bool get isBlackField => ((index / 8).floor() + index) % 2 == 1;
   bool get isPossibleField {
+    if(!isBlackField) return false;
     if (currentState.possibleFields == null) return false;
-    return currentState.possibleFields.contains(index);
+    return currentState.possibleFields.contains(position);
   }
 
-  Piece get piece => currentState.getPieceAt(index);
+  Piece get piece => isBlackField?currentState.getPieceAt(position):null;
 
   void onClick() {
-    if (!currentState.possibleFields.contains(index)) return;
-    currentState.move(currentState.activePiece, currentState.activePiecePosition, index);
+    if(!isBlackField) return;
+    if (!currentState.possibleFields.contains(position)) return;
+    currentState.move(currentState.activePiece, currentState.activePiecePosition, position);
+  }
+  @override
+  void ngOnInit() {
+    position=(index/2).floor();
+    isBlackField = ((index / 8).floor() + index) % 2 == 1;
   }
 }

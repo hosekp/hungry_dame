@@ -61,17 +61,20 @@ class PredictedState extends State {
     Iterator<int> iterator=pieces8.iterator;
     while(iterator.moveNext()){
       int pieceCode = iterator.current;
-      if(pieceCode==0) continue;
+      if(pieceCode==0){
+        piecePos++;
+        continue;
+      };
       if (pieceCode > 0) {
         if (pieceCode == WHITE_PIECE_CODE) {
-          int row = (piecePos / 8).floor();
+          int row = (piecePos / 4).floor();
           whiteScore += PIECE_VALUE * (1 + (7 - row) / 7.0);
         } else {
           whiteScore += DAME_VALUE;
         }
       } else {
         if (pieceCode == BLACK_PIECE_CODE) {
-          int row = (piecePos / 8).floor();
+          int row = (piecePos / 4).floor();
           blackScore += PIECE_VALUE * (1 + row / 7.0);
         } else {
           blackScore += DAME_VALUE;
