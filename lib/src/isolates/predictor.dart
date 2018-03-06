@@ -14,8 +14,8 @@ class Predictor {
   Queue<PredictedState> stateQueue = new Queue<PredictedState>();
   int currentStep = 0;
   DateTime lastUpdateTime;
+  DateTime lastPredictTime;
   bool _paused = false;
-  final RegExp whiteRegexp = new RegExp("$WHITE_DAME|$WHITE_PIECE");
 
   void init(SendPort sendPort) {
     portToMain = sendPort;
@@ -47,7 +47,7 @@ class Predictor {
     }
     if (chosenState != null) {
       predictions = [];
-      String pathStep = chosenState.pathStep;
+      int pathStep = chosenState.path.last;
       orphans = orphans
           .where((PredictedState state) => state.path.length > 0 && state.path.first == pathStep)
           .map((PredictedState state) => state..path.removeAt(0))
@@ -80,6 +80,7 @@ class Predictor {
       }
     }
     lastUpdateTime = new DateTime.now();
+    lastPredictTime = lastUpdateTime;
     predictCycler();
   }
 
@@ -136,26 +137,26 @@ class Predictor {
 
   double computeTreeCost(Iterable<PredictedState> stateGroup, int depth) {
     double bestScore;
-    Map<String, List<PredictedState>> subGroups = {};
+    Map<int, List<PredictedState>> subGroups = {};
     for (PredictedState state in stateGroup) {
       if (state.path.length == depth) {
         return state.computeScore();
       }
-      String pathPart = state.path[depth];
+      int pathPart = state.path[depth];
       if (subGroups[pathPart] == null) {
         subGroups[pathPart] = [state];
         continue;
       }
       subGroups[pathPart].add(state);
     }
-    subGroups.forEach((String pathPart, List<PredictedState> states) {
+    subGroups.forEach((int pathPart, List<PredictedState> states) {
       double subGroupScore = computeTreeCost(states, depth + 1);
       if (bestScore == null) {
         bestScore = subGroupScore;
         return;
       }
 //      print("$pathPart $bestScore ${bestScore > subGroupScore?">":"<="} $subGroupScore");
-      if (pathPart.startsWith(whiteRegexp)) {
+      if (pathPart>0) {
         if (bestScore < subGroupScore) {
 //          print("New best: $bestScore=>$subGroupScore for $pathPart");
           bestScore = subGroupScore;
@@ -192,14 +193,14 @@ class Predictor {
         [orphans, stateQueue].expand((f) => f).where((PredictedState state) => state != null);
     List<Map<String, dynamic>> messages = [];
     for (PredictedState state in predictions) {
-      String firstPath = state.path.first;
+      int firstPath = state.path.first;
       Iterable<PredictedState> group =
           allStates.where((PredictedState subState) => subState.path.length>0 && subState.path[0] == firstPath);
       double score = computeTreeCost(group, 1);
       messages.add(MessageBus.toMessage(state, score));
     }
     double currentDepth = computeDepth();
-    messages.add({"steps": stateQueue.length + orphans.length, "depth": currentDepth});
+    messages.add({"steps": stateQueue.length + orphans.length, "depth": currentDepth,"time":new DateTime.now().difference(lastPredictTime).inSeconds});
     portToMain.send(messages);
   }
   void sendProgress(){

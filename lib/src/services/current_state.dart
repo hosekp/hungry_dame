@@ -24,10 +24,10 @@ class CurrentState extends State {
     blackIsPlaying = false;
     pieces8 = Arrangement.start();
 //    pieces8 = Arrangement.testChained();
-//    pieces = Arrangement.testDame();
-//    pieces = Arrangement.testEnd();
-//    pieces = Arrangement.testPromote();
-//    pieces = Arrangement.testPredict();
+//    pieces8 = Arrangement.testDame();
+//    pieces8 = Arrangement.testEnd();
+//    pieces8 = Arrangement.testPromote();
+//    pieces8 = Arrangement.testPredict();
     playablePieces=findPlayablePieces();
     setActivePiece(null, null);
     nextRoundChanged.notify();

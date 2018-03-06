@@ -5,15 +5,9 @@ import 'package:hungry_dame/src/model/state.dart';
 import 'package:hungry_dame/src/services/constants.dart';
 
 class PredictedState extends State {
-  Piece lastMovedPiece;
-  int lastMoveTarget;
-  int lastMoveOrigin;
-  List<String> path = [];
+  List<int> path = [];
 
   PredictedState.move(State previous, Piece piece, int origin, int target) {
-    lastMoveTarget = target;
-    lastMovedPiece = piece;
-    lastMoveOrigin = origin;
     pieces8 = Arrangement.copy(previous.pieces8);
     isForced = previous.isForced;
     blackIsPlaying = previous.blackIsPlaying;
@@ -36,7 +30,7 @@ class PredictedState extends State {
     if (previous is PredictedState) {
       path.addAll(previous.path);
     }
-    path.add(pathStep);
+    path.add(pathStepBuild(piece, origin, target));
   }
 
   PredictedState.allData(Int8List pieces, bool black, bool isChained, int origin, int target) {
@@ -45,26 +39,32 @@ class PredictedState extends State {
     if (isChained) {
       chainedPiece = pieces[target];
     }
-    if (target != null) {
-      lastMovedPiece = getPieceAt(target);
-      lastMoveTarget = target;
-      lastMoveOrigin = origin;
-    }
   }
-  String get pathStep => "${lastMovedPiece.letter}${lastMoveOrigin}-$lastMoveTarget";
+  int get pathStep => path.last;
+  Piece get lastStepPiece {
+    int code = (pathStep.abs() / 1000000).floor()*pathStep.sign;
+    return SPECIES[code];
+  }
+  int get lastStepOrigin => ((pathStep.abs()%1000000)/1000).floor();
+  int get lastStepTarget => pathStep.abs()%1000;
+
+  static int pathStepBuild(Piece piece, int origin, int target) {
+    return (piece.code.abs() * 1000000 + origin * 1000 + target)*piece.code.sign;
+  }
+
   String get id => "${super.id}|${path}";
 
   double computeScore() {
     double whiteScore = 0.0;
     double blackScore = 0.0;
-    int piecePos=0;
-    Iterator<int> iterator=pieces8.iterator;
-    while(iterator.moveNext()){
+    int piecePos = 0;
+    Iterator<int> iterator = pieces8.iterator;
+    while (iterator.moveNext()) {
       int pieceCode = iterator.current;
-      if(pieceCode==0){
+      if (pieceCode == 0) {
         piecePos++;
         continue;
-      };
+      }
       if (pieceCode > 0) {
         if (pieceCode == WHITE_PIECE_CODE) {
           int row = (piecePos / 4).floor();

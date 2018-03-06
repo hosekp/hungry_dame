@@ -8,9 +8,9 @@ class MessageBus {
     return {
       "arr": state.arrangementId,
 //      "black": state.blackIsPlaying,
-      "origin": state.lastMoveOrigin,
-      "piece": state.lastMovedPiece.letter,
-      "target": state.lastMoveTarget,
+      "origin": state.lastStepOrigin,
+      "piece": state.lastStepPiece.letter,
+      "target": state.lastStepTarget,
 //      "chained": state.chainedPiece != null,
       "score": score
     };
