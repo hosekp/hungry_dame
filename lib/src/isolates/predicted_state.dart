@@ -42,14 +42,14 @@ class PredictedState extends State {
   }
   int get pathStep => path.last;
   Piece get lastStepPiece {
-    int code = (pathStep.abs() / 1000000).floor()*pathStep.sign;
+    int code = (pathStep.abs() / 1000000).floor() * pathStep.sign;
     return SPECIES[code];
   }
-  int get lastStepOrigin => ((pathStep.abs()%1000000)/1000).floor();
-  int get lastStepTarget => pathStep.abs()%1000;
+  int get lastStepOrigin => ((pathStep.abs() % 1000000) / 1000).floor();
+  int get lastStepTarget => pathStep.abs() % 1000;
 
   static int pathStepBuild(Piece piece, int origin, int target) {
-    return (piece.code.abs() * 1000000 + origin * 1000 + target)*piece.code.sign;
+    return (piece.code.abs() * 1000000 + origin * 1000 + target) * piece.code.sign;
   }
 
   String get id => "${super.id}|${path}";
@@ -65,7 +65,7 @@ class PredictedState extends State {
         piecePos++;
         continue;
       }
-      if (pieceCode > 0) {
+      if (pieceCode >= WHITE_PIECE_CODE) {
         if (pieceCode == WHITE_PIECE_CODE) {
           int row = (piecePos / 4).floor();
           whiteScore += PIECE_VALUE * (1 + (7 - row) / 7.0);

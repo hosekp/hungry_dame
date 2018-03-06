@@ -21,8 +21,8 @@ class MessageBus {
   }
 
   static PredictedState fromInitMessage(Map<String, dynamic> message) {
-    PredictedState state = new PredictedState.allData(Arrangement.fromId(message["arr"]), message["black"],
-        message["chained"], message["origin"], message["target"]);
+    PredictedState state = new PredictedState.allData(
+        Arrangement.fromId(message["arr"]), message["black"], message["chained"], message["origin"], message["target"]);
     return state;
   }
 

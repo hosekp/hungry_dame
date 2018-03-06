@@ -28,7 +28,7 @@ class Predictor {
           return;
         }
         if (rawMessage.containsKey("sendResult")) {
-          if(_paused) return;
+          if (_paused) return;
           sendResults();
           return;
         }
@@ -96,15 +96,15 @@ class Predictor {
       if (states.length == 0) {
         orphans.add(state);
       } else {
-        if(state.isForced){
+        if (state.isForced) {
           states.forEach(stateQueue.addFirst);
-        }else{
+        } else {
           stateQueue.addAll(states);
         }
       }
     }
     if (new DateTime.now().difference(lastUpdateTime) > UPDATE_PERIOD) {
-      if(stateQueue.length+orphans.length >=MAX_STEPS){
+      if (stateQueue.length + orphans.length >= MAX_STEPS) {
         return pause();
       }
       sendProgress();
@@ -115,7 +115,7 @@ class Predictor {
   }
 
   List<PredictedState> predictForStateOneLevel(PredictedState state) {
-    if(state.path.length == MAX_DEPTH) return const [];
+    if (state.path.length == MAX_DEPTH) return const [];
     List<PredictedState> predictions = prepareMoves(state);
     return predictions;
   }
@@ -156,7 +156,7 @@ class Predictor {
         return;
       }
 //      print("$pathPart $bestScore ${bestScore > subGroupScore?">":"<="} $subGroupScore");
-      if (pathPart>0) {
+      if (pathPart >= WHITE_PIECE_CODE * 1000000) {
         if (bestScore < subGroupScore) {
 //          print("New best: $bestScore=>$subGroupScore for $pathPart");
           bestScore = subGroupScore;
@@ -195,15 +195,20 @@ class Predictor {
     for (PredictedState state in predictions) {
       int firstPath = state.path.first;
       Iterable<PredictedState> group =
-          allStates.where((PredictedState subState) => subState.path.length>0 && subState.path[0] == firstPath);
+          allStates.where((PredictedState subState) => subState.path.length > 0 && subState.path[0] == firstPath);
       double score = computeTreeCost(group, 1);
       messages.add(MessageBus.toMessage(state, score));
     }
     double currentDepth = computeDepth();
-    messages.add({"steps": stateQueue.length + orphans.length, "depth": currentDepth,"time":new DateTime.now().difference(lastPredictTime).inSeconds});
+    messages.add({
+      "steps": stateQueue.length + orphans.length,
+      "depth": currentDepth,
+      "time": new DateTime.now().difference(lastPredictTime).inSeconds
+    });
     portToMain.send(messages);
   }
-  void sendProgress(){
+
+  void sendProgress() {
     double currentDepth = computeDepth();
     portToMain.send({"steps": stateQueue.length + orphans.length, "depth": currentDepth});
   }
